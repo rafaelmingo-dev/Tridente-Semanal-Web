@@ -5,40 +5,35 @@ import numpy as np
 from datetime import datetime, timedelta
 
 # ==============================================================================
-# 🔐 SEGURANÇA (LOGIN)
+# 🔐 SEGURANÇA
 # ==============================================================================
 SENHA_ACESSO = "tridente2025" 
 
 def check_password():
-    """Retorna True se o usuário estiver logado."""
     if "password_correct" not in st.session_state:
         st.session_state["password_correct"] = False
-
     if st.session_state["password_correct"]:
         return True
-
-    st.markdown("## 🔐 Robô Tridente V.37 - Acesso Restrito")
-    password = st.text_input("Digite a senha:", type="password")
     
+    st.markdown("## 🔐 Acesso Restrito V.38")
+    password = st.text_input("Senha:", type="password")
     if st.button("Entrar"):
         if password == SENHA_ACESSO:
             st.session_state["password_correct"] = True
             st.rerun()
         else:
-            st.error("Senha incorreta.")
+            st.error("Senha Incorreta")
     return False
 
 # ==============================================================================
-# ⚙️ LÓGICA V.31 (MATEMÁTICA GOLDEN STANDARD) - INTACTA
+# ⚙️ LÓGICA V.31 (MATEMÁTICA PURA)
 # ==============================================================================
 ATIVO_CAIXA = 'B5P211.SA'
 
 CATALOGO = {
-    # --- DEFESA ---
     'IVVB11.SA': {'MM': 40, 'RSI_MAX': 70, 'DIST_MAX': 0.20, 'VOL_LIMIT': 0.4},
     'GOLD11.SA': {'MM': 16, 'RSI_MAX': 70, 'DIST_MAX': 0.10, 'VOL_LIMIT': 0.4},
     'B5P211.SA': {'MM': 4 , 'RSI_MAX': 75, 'DIST_MAX': 0.10, 'VOL_LIMIT': 0.4},
-    # --- ATAQUE ---
     'HASH11.SA': {'MM': 6 , 'RSI_MAX': 75, 'DIST_MAX': 0.10, 'VOL_LIMIT': 0.6},
     'PRIO3.SA':  {'MM': 52, 'RSI_MAX': 70, 'DIST_MAX': 0.10, 'VOL_LIMIT': 0.8},
     'BPAC11.SA': {'MM': 16, 'RSI_MAX': 75, 'DIST_MAX': 0.30, 'VOL_LIMIT': 0.4},
@@ -69,8 +64,7 @@ ATAQUE = [t for t in TICKERS if t not in DEFESA]
 
 @st.cache_data(ttl=3600)
 def get_data_and_calculate():
-    """Baixa dados e aplica a lógica V.31 minuciosamente."""
-    dias = (5 * 365) 
+    dias = (5 * 365)
     start = (datetime.now() - timedelta(days=dias)).strftime('%Y-%m-%d')
     try:
         data = yf.download(TICKERS, start=start, interval='1wk', progress=False, group_by='ticker', auto_adjust=True)
@@ -85,7 +79,6 @@ def get_data_and_calculate():
             close = df['Close']
             P = CATALOGO[t]
             
-            # --- CÁLCULOS IDÊNTICOS AO BACKTEST V.31 ---
             atual = float(close.iloc[-1])
             sma = close.rolling(P['MM']).mean().iloc[-1]
             dist = (atual / sma) - 1
@@ -106,7 +99,6 @@ def get_data_and_calculate():
                 safe_vol = vol if vol > 0.01 else 0.01
                 score = 1 / safe_vol
 
-            # JULGAMENTO (REGRAS V.31)
             acao = "COMPRA"
             status = f"SCORE {score:.2f}"
             tipo = "ATAQUE" if t in ATAQUE else "DEFESA"
@@ -125,177 +117,138 @@ def get_data_and_calculate():
     return pd.DataFrame(resultados)
 
 # ==============================================================================
-# 🎨 INTERFACE VISUAL (CSS OTIMIZADO PARA EVITAR ERROS)
+# 🎨 UI
 # ==============================================================================
 def main():
     if not check_password(): return
 
-    st.set_page_config(page_title="Robô Tridente V.37", page_icon="🔱", layout="wide")
+    st.set_page_config(page_title="Robô Tridente V.38", page_icon="🔱", layout="wide")
     
-    # CSS LIMPO E SEGURO
     st.markdown("""
     <style>
-    .main-header { font-size: 32px; font-weight: 800; color: #fff; text-align: center; margin-bottom: 20px; }
+    .main-header {font-size: 32px; font-weight: 800; color: #fff; text-align: center;}
+    .sub-header {font-size: 14px; color: #888; text-align: center; margin-bottom: 20px;}
     
-    /* CARD VENDA */
+    /* Venda Card */
     .card-sell {
-        background-color: #3a0000;
-        border: 1px solid #ff4444; border-radius: 10px; padding: 15px; margin-bottom: 15px;
+        background: #3a0000; border: 1px solid #ff4444; border-radius: 8px; padding: 15px; margin-bottom: 10px;
     }
-    .sell-text { color: #ff6666; font-size: 18px; font-weight: bold; }
-    .sell-sub { color: #fff; font-size: 14px; }
+    .sell-txt { color: #ff6666; font-size: 18px; font-weight: bold; margin: 0; }
+    .sell-det { color: #fff; font-size: 13px; margin: 0; }
 
-    /* CARD COMPRA */
+    /* Compra Card */
     .card-buy {
-        background-color: #0e1117; 
-        border: 1px solid #2e7d32; 
-        border-radius: 12px; 
-        padding: 0px; 
-        overflow: hidden;
-        margin-bottom: 20px;
+        background-color: #0e1117; border: 1px solid #2e7d32; border-radius: 12px; overflow: hidden; margin-bottom: 15px;
     }
     .buy-head {
-        background-color: #1b5e20; padding: 12px; display: flex; justify-content: space-between; align-items: center;
+        background-color: #1b5e20; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center;
     }
-    .buy-title { color: #fff; font-size: 22px; font-weight: 900; margin:0; }
-    .buy-badge { background-color: #000; color: #4caf50; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; }
+    .buy-tit { color: #fff; font-size: 20px; font-weight: 900; margin: 0; }
+    .buy-bdg { background: #000; color: #4caf50; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; }
     
-    .buy-content { padding: 15px; }
-    .money-val { font-size: 26px; font-weight: 800; color: #4caf50; }
+    .buy-bod { padding: 15px; }
+    .val-big { font-size: 24px; font-weight: 800; color: #4caf50; margin: 0; }
+    .val-lbl { font-size: 11px; color: #aaa; text-transform: uppercase; margin: 0; }
     
-    /* BOLETA STYLE */
+    /* Boleta Clean */
     .boleta-wrap {
-        background-color: #161b22; 
-        border-radius: 8px; 
-        padding: 12px; 
-        margin-top: 15px; 
-        border-left: 4px solid #4caf50;
+        background-color: #161b22; border-radius: 6px; padding: 10px; margin-top: 10px; border-left: 3px solid #4caf50;
     }
-    .bol-line {
-        display: flex; justify-content: space-between; margin-bottom: 6px; border-bottom: 1px dashed #333; padding-bottom: 4px;
+    .bol-row {
+        display: flex; justify-content: space-between; border-bottom: 1px dashed #333; padding-bottom: 3px; margin-bottom: 3px;
     }
-    .bol-key { color: #888; font-size: 13px; }
-    .bol-val { color: #fff; font-weight: bold; font-family: monospace; font-size: 14px; }
-    
+    .bol-row:last-child { border: none; margin: 0; padding: 0; }
+    .bol-k { color: #888; font-size: 12px; }
+    .bol-v { color: #fff; font-weight: bold; font-family: monospace; font-size: 13px; }
     </style>
     """, unsafe_allow_html=True)
 
-    st.markdown("<div class='main-header'>🔱 ROBÔ TRIDENTE V.37</div>", unsafe_allow_html=True)
+    st.markdown("<div class='main-header'>🔱 ROBÔ TRIDENTE V.38</div>", unsafe_allow_html=True)
+    st.markdown("<div class='sub-header'>Versão Definitiva</div>", unsafe_allow_html=True)
 
-    # SIDEBAR
     with st.sidebar:
         st.header("💰 Carteira")
-        capital = st.number_input("Patrimônio Total (R$)", min_value=0.0, value=2000.0, step=100.0)
-        if st.button("🔄 Rodar Análise"):
+        capital = st.number_input("Patrimônio (R$)", min_value=0.0, value=2000.0, step=100.0)
+        if st.button("🔄 Rodar"):
             st.cache_data.clear()
             st.rerun()
-        st.info("Estratégia Equal Weight (33%).")
+        st.info("Estratégia Equal Weight (33%)")
 
-    # DADOS
-    with st.spinner('📡 Analisando...'):
+    with st.spinner('📡 Conectando...'):
         df = get_data_and_calculate()
 
     if df.empty:
-        st.error("Erro de conexão com B3.")
+        st.error("Erro na B3.")
         return
 
-    # LÓGICA DE ALOCAÇÃO
     vendas = df[df['Acao'] == 'VENDA']
-    compras_ataque = df[(df['Acao'] == 'COMPRA') & (df['Tipo'] == 'ATAQUE')].sort_values('Score', ascending=False)
-    compras_defesa = df[(df['Acao'] == 'COMPRA') & (df['Tipo'] == 'DEFESA')].sort_values('Score', ascending=False)
+    ataque = df[(df['Acao'] == 'COMPRA') & (df['Tipo'] == 'ATAQUE')].sort_values('Score', ascending=False)
+    defesa = df[(df['Acao'] == 'COMPRA') & (df['Tipo'] == 'DEFESA')].sort_values('Score', ascending=False)
 
-    carteira_final = []
-    carteira_final.extend(compras_ataque.head(3).to_dict('records'))
-    vagas = 3 - len(carteira_final)
-    if vagas > 0: carteira_final.extend(compras_defesa.head(vagas).to_dict('records'))
+    final = []
+    final.extend(ataque.head(3).to_dict('records'))
+    vagas = 3 - len(final)
+    if vagas > 0: final.extend(defesa.head(vagas).to_dict('records'))
 
-    # 1. VENDAS
+    # VENDAS
     if not vendas.empty:
-        st.markdown("### 1️⃣ ALERTAS DE VENDA")
+        st.markdown("### 1️⃣ VENDER")
         cols = st.columns(3)
         for idx, row in enumerate(vendas.to_dict('records')):
             with cols[idx % 3]:
-                # HTML SIMPLIFICADO PARA EVITAR ERROS
-                st.markdown(f"""
-                <div class="card-sell">
-                    <div class="sell-text">❌ {row['Ticker']}</div>
-                    <div class="sell-sub">Motivo: {row['Status']}</div>
-                    <div class="sell-sub">Ref: R$ {row['Preco']:.2f}</div>
-                </div>
-                """, unsafe_allow_html=True)
+                # HTML SEM IDENTAÇÃO PARA EVITAR ERRO
+                st.markdown(f"<div class='card-sell'><p class='sell-txt'>❌ {row['Ticker']}</p><p class='sell-det'>Motivo: {row['Status']}</p></div>", unsafe_allow_html=True)
     else:
-        st.success("✅ Nenhuma venda necessária.")
+        st.success("Nenhuma venda necessária.")
 
-    # 2. COMPRAS
+    # COMPRAS
     st.markdown("---")
-    st.markdown("### 2️⃣ NOVAS COMPRAS (PASSO A PASSO)")
+    st.markdown("### 2️⃣ COMPRAR")
     
-    if not carteira_final:
-        st.error(f"Mercado Ruim. Fique 100% no CAIXA ({ATIVO_CAIXA}).")
+    if not final:
+        st.error(f"Fique 100% no CAIXA ({ATIVO_CAIXA}).")
     else:
-        peso = 1.0 / len(carteira_final)
-        cols = st.columns(len(carteira_final))
+        peso = 1.0 / len(final)
+        cols = st.columns(len(final))
         
-        for i, ativo in enumerate(carteira_final):
+        for i, ativo in enumerate(final):
             with cols[i]:
-                alocacao = capital * peso
-                qtd_total = int(alocacao / ativo['Preco'])
+                alo = capital * peso
+                qtd = int(alo / ativo['Preco'])
+                padrao = (qtd // 100) * 100
+                frac = qtd % 100
+                cod = ativo['Ticker'].replace('.SA', '')
                 
-                # CÁLCULOS
-                qtd_padrao = (qtd_total // 100) * 100
-                qtd_frac = qtd_total % 100
-                ticker_base = ativo['Ticker'].replace('.SA', '')
-                
-                # HTML BUILDER (STRING PURA PARA SEGURANÇA)
+                # HTML MONTOU EM LINHA ÚNICA
+                html_items = ""
+                if padrao > 0:
+                    html_items += f"<div class='bol-row'><span class='bol-k'>Opção 1:</span><span class='bol-v'>{padrao} x {cod}</span></div>"
+                if frac > 0:
+                    lbl = "Opção 2:" if padrao > 0 else "Única:"
+                    html_items += f"<div class='bol-row'><span class='bol-k'>{lbl}</span><span class='bol-v'>{frac} x {cod}F</span></div>"
+
                 html_card = f"""
-                <div class="card-buy">
-                    <div class="buy-head">
-                        <span class="buy-title">{ativo['Ticker']}</span>
-                        <span class="buy-badge">{ativo['Tipo']}</span>
+                <div class='card-buy'>
+                    <div class='buy-head'>
+                        <span class='buy-tit'>{ativo['Ticker']}</span>
+                        <span class='buy-bdg'>{ativo['Tipo']}</span>
                     </div>
-                    <div class="buy-content">
-                        <div style="font-size:12px; color:#aaa;">VALOR A INVESTIR</div>
-                        <div class="money-val">R$ {alocacao:,.0f}</div>
-                        
-                        <div class="boleta-wrap">
-                            <div style="color:#4caf50; font-weight:bold; font-size:12px; margin-bottom:8px;">📝 ORDEM NA CORRETORA</div>
-                """
-                
-                # Adiciona Lote Padrão se existir
-                if qtd_padrao > 0:
-                    html_card += f"""
-                    <div class="bol-line">
-                        <span class="bol-key">Opção 1 (Lote):</span>
-                        <span class="bol-val">{qtd_padrao} x {ticker_base}</span>
-                    </div>
-                    """
-                
-                # Adiciona Fracionário se existir
-                if qtd_frac > 0:
-                    label = "Opção 2 (Sobra):" if qtd_padrao > 0 else "Opção Única:"
-                    html_card += f"""
-                    <div class="bol-line">
-                        <span class="bol-key">{label}</span>
-                        <span class="bol-val">{qtd_frac} x {ticker_base}F</span>
-                    </div>
-                    """
-                
-                # Fecha o HTML
-                html_card += f"""
-                            <div style="margin-top:8px; text-align:center; font-size:11px; color:#666;">
-                                Preço: A Mercado | Motivo: {ativo['Status']}
-                            </div>
+                    <div class='buy-bod'>
+                        <p class='val-lbl'>INVESTIR</p>
+                        <p class='val-big'>R$ {alo:,.0f}</p>
+                        <div class='boleta-wrap'>
+                            <div style='color:#4caf50;font-weight:bold;font-size:11px;margin-bottom:5px;'>NA CORRETORA</div>
+                            {html_items}
+                            <div style='margin-top:5px;font-size:10px;color:#666;text-align:center;'>{ativo['Status']}</div>
                         </div>
                     </div>
                 </div>
                 """
-                
                 st.markdown(html_card, unsafe_allow_html=True)
 
-    # 3. TABELA ESPIÃO
     st.markdown("---")
-    with st.expander("🔍 Espião (Tabela Técnica Completa)"):
-        st.dataframe(df.style.map(lambda x: 'color:#ff4b4b' if 'VENDA' in str(x) else ('color:#4caf50' if 'COMPRA' in str(x) else 'color:#aaa'), subset=['Acao']))
+    with st.expander("🔍 Tabela Completa"):
+        st.dataframe(df.style.map(lambda x: 'color:#f44' if 'VENDA' in str(x) else ('color:#4f4' if 'COMPRA' in str(x) else 'color:#aaa'), subset=['Acao']))
 
 if __name__ == "__main__":
     main()
