@@ -15,7 +15,7 @@ def check_password():
     if st.session_state["password_correct"]:
         return True
     
-    st.markdown("## 🔐 Acesso Restrito - Robô Tridente")
+    st.markdown("## 🔐 Robô Tridente V.45")
     password = st.text_input("Senha:", type="password")
     if st.button("Entrar"):
         if password == SENHA_ACESSO:
@@ -117,54 +117,38 @@ def get_data_and_calculate():
     return pd.DataFrame(resultados)
 
 # ==============================================================================
-# 🎨 UI V.44 (HTML BLINDADO E CONCATENADO)
+# 🎨 UI V.45 (TERMINAL-LIKE SIMULATION)
 # ==============================================================================
 def main():
     if not check_password(): return
 
-    st.set_page_config(page_title="Robô Tridente V.44", page_icon="🔱", layout="wide")
+    st.set_page_config(page_title="Robô Tridente V.45", page_icon="🔱", layout="wide")
     
-    # CSS OTIMIZADO
+    # CSS PARA CONTRASTE
     st.markdown("""
     <style>
-    .stApp { background-color: #0b0c10; color: #fff; }
-    h1, h2, h3 { color: #fff !important; }
+    .stApp { background-color: #000000; } /* Fundo Preto Puro */
+    h1, h2, h3, h4 { color: #00ff88 !important; } /* Texto principal Verde Neon */
     
-    /* CARD VENDA */
-    .card-sell {
-        background: #2b0e0e; border: 1px solid #ff4444; border-radius: 8px; padding: 15px; margin-bottom: 10px;
+    /* Bloco de Terminal/Instrução */
+    .terminal-box {
+        background-color: #111; /* Cinza bem escuro para fundo do terminal */
+        border: 1px solid #333;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 15px;
+        font-family: 'Courier New', monospace;
+        color: #ddd; /* Texto cinza claro */
     }
-    .sell-tit { color: #ff6666; font-size: 18px; font-weight: bold; margin: 0; }
-    .sell-sub { color: #fff; font-size: 13px; }
-
-    /* CARD COMPRA */
-    .card-buy {
-        background-color: #12141c; border: 2px solid #00ff88; border-radius: 12px; margin-bottom: 20px; overflow: hidden;
-    }
-    .buy-head {
-        background: #002e16; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #00ff88;
-    }
-    .buy-tit { color: #fff; font-size: 22px; font-weight: 900; margin: 0; }
-    .buy-bg { background: #000; color: #00ff88; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
-    
-    .buy-body { padding: 15px; }
-    .money-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 15px; }
-    .money-val { font-size: 28px; font-weight: 800; color: #00ff88; line-height: 1; }
-    .money-lbl { font-size: 11px; color: #aaa; text-transform: uppercase; }
-    .money-prc { font-size: 14px; color: #fff; text-align: right; }
-
-    /* BOLETA TABLE STYLE */
-    .boleta-box {
-        background-color: #000; border: 1px solid #333; border-radius: 6px; padding: 10px; border-left: 4px solid #00ff88;
-    }
-    .boleta-tit { color: #58a6ff; font-size: 12px; font-weight: bold; margin-bottom: 5px; border-bottom: 1px solid #333; padding-bottom: 5px; }
-    .bol-row { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 13px; color: #ddd; }
-    .bol-val { color: #fff; font-weight: bold; font-family: monospace; }
+    .terminal-line { margin-bottom: 5px; line-height: 1.5; }
+    .terminal-accent { color: #00ff88; font-weight: bold; } /* Destaque Verde Neon */
+    .terminal-error { color: #ff4444; font-weight: bold; } /* Destaque Vermelho */
     </style>
     """, unsafe_allow_html=True)
 
-    st.title("🔱 ROBÔ TRIDENTE V.44")
-    st.markdown("#### Painel Profissional | Equal Weight (33%)")
+    st.title("🔱 ROBÔ TRIDENTE V.45")
+    st.markdown("### Painel de Execução Profissional")
+    st.divider()
 
     with st.sidebar:
         st.header("💰 Carteira")
@@ -172,7 +156,7 @@ def main():
         if st.button("🔄 Rodar"):
             st.cache_data.clear()
             st.rerun()
-        st.info("Estratégia V.31 Otimizada")
+        st.info("Estratégia Equal Weight (33%).")
 
     with st.spinner('📡 Analisando...'):
         df = get_data_and_calculate()
@@ -190,78 +174,76 @@ def main():
     vagas = 3 - len(final)
     if vagas > 0: final.extend(defesa.head(vagas).to_dict('records'))
 
-    # VENDAS
-    if not vendas.empty:
-        st.subheader("1️⃣ VENDAS")
-        cols = st.columns(3)
-        for idx, row in enumerate(vendas.to_dict('records')):
-            with cols[idx % 3]:
-                # HTML CONCATENADO PARA NAO QUEBRAR
-                html = ""
-                html += f"<div class='card-sell'>"
-                html += f"<div class='sell-tit'>❌ {row['Ticker']}</div>"
-                html += f"<div class='sell-sub'>Ref: R$ {row['Preco']:.2f}</div>"
-                html += f"<div class='sell-sub' style='color:#ffaaaa'>{row['Status']}</div>"
-                html += f"</div>"
-                st.markdown(html, unsafe_allow_html=True)
-    else:
-        st.success("✅ Nenhuma venda necessária.")
-
-    st.markdown("---")
-
-    # COMPRAS
-    st.subheader("2️⃣ NOVAS COMPRAS")
+    # CONSTRUÇÃO DO GUIA EM TEXTO FORMATADO (SIMULAÇÃO DO TERMINAL)
+    guia_html = ""
     
+    # === PASSO 1: VENDAS ===
+    guia_html += "<h4>1️⃣ PASSO 1: FAZER CAIXA (VENDER)</h4>"
+    if not vendas.empty:
+        guia_html += "<p>Verifique sua carteira atual. Se você tiver algum destes ativos, <span class='terminal-error'>VENDA TUDO</span>.</p>"
+        guia_html += "<p style='margin-left: 20px;'>"
+        for row in vendas.to_dict('records'):
+            guia_html += f"❌ <span class='terminal-error'>{row['Ticker']}</span> &rarr; Motivo: {row['Status']}<br>"
+        guia_html += "💵 O dinheiro dessas vendas será usado no Passo 2.</p>"
+    else:
+        guia_html += "<p>✅ Nenhuma venda necessária. Seus ativos atuais continuam bons.</p>"
+    
+    guia_html += "<hr style='border-color:#333;'>"
+    
+    # === PASSO 2: COMPRAS ===
+    guia_html += f"<h4>2️⃣ PASSO 2: COMPRAR NOVOS ATIVOS</h4>"
+    guia_html += f"<p>Vamos distribuir seus <span class='terminal-accent'>R$ {capital:,.2f}</span> igualmente nos {len(final) if final else 0} melhores ativos.</p>"
+
     if not final:
-        st.error(f"Fique 100% no CAIXA ({ATIVO_CAIXA}).")
+        guia_html += f"<p style='color:red'>🛑 PARE TUDO. Mercado perigoso. 👉 AÇÃO: Deixe 100% no {ATIVO_CAIXA}.</p>"
     else:
         peso = 1.0 / len(final)
-        cols = st.columns(len(final))
         
         for i, ativo in enumerate(final):
-            with cols[i]:
-                alo = capital * peso
-                qtd = int(alo / ativo['Preco'])
-                padrao = (qtd // 100) * 100
-                frac = qtd % 100
-                cod = ativo['Ticker'].replace('.SA', '')
-                
-                # MONTAGEM SEGURA DO HTML (SEM IDENTAÇÃO INTERNA)
-                html = ""
-                html += f"<div class='card-buy'>"
-                html += f"<div class='buy-head'>"
-                html += f"<span class='buy-tit'>{ativo['Ticker']}</span>"
-                html += f"<span class='buy-bg'>RANK #{i+1}</span>"
-                html += f"</div>"
-                
-                html += f"<div class='buy-body'>"
-                html += f"<div class='money-row'>"
-                html += f"<div><div class='money-lbl'>INVESTIR</div><div class='money-val'>R$ {alo:,.0f}</div></div>"
-                html += f"<div class='money-prc'>Preço<br>R$ {ativo['Preco']:.2f}</div>"
-                html += f"</div>"
-                
-                html += f"<div class='boleta-box'>"
-                html += f"<div class='boleta-tit'>📝 NA CORRETORA</div>"
-                
-                if padrao > 0:
-                    html += f"<div class='bol-row'><span>Opção 1 (Lote):</span><span class='bol-val'>Comprar {padrao} x {cod}</span></div>"
-                
-                if frac > 0:
-                    lbl = "Opção 2 (Sobra):" if padrao > 0 else "Opção Única:"
-                    html += f"<div class='bol-row'><span>{lbl}</span><span class='bol-val'>Comprar {frac} x {cod}F</span></div>"
-                
-                html += f"<div style='border-top:1px dashed #333; margin-top:5px; padding-top:5px; text-align:center; font-size:12px; color:#666;'>Ordem a Mercado</div>"
-                html += f"</div>" # fecha boleta
-                
-                html += f"<div style='text-align:center; margin-top:10px; font-size:11px; color:#888;'>Motivo: {ativo['Status']}</div>"
-                html += f"</div>" # fecha body
-                html += f"</div>" # fecha card
+            alo = capital * peso
+            qtd = int(alo / ativo['Preco'])
+            padrao = (qtd // 100) * 100
+            frac = qtd % 100
+            cod = ativo['Ticker'].replace('.SA', '')
+            
+            guia_html += f"<br>"
+            guia_html += f"<p style='font-size:16px; font-weight:bold; color:white;'>🏆 RANK #{i+1}: {ativo['Ticker']} ({ativo['Tipo']})</p>"
+            guia_html += f"<p style='margin-left: 20px;'>"
+            guia_html += f"💰 Valor para investir: <span class='terminal-accent'>R$ {alo:,.2f}</span><br>"
+            guia_html += f"📊 Preço Atual: R$ {ativo['Preco']:.2f}<br>"
+            guia_html += f"📝 **COMO PREENCHER A ORDEM (BOLETA):**<br>"
+            
+            # --- DETALHE DA BOLETA (Recria o visual do terminal) ---
+            if padrao > 0:
+                guia_html += f"&nbsp;&nbsp;&nbsp;&nbsp;[1] Código: <span class='terminal-accent'>{cod}</span> (Lote Padrão)<br>"
+                guia_html += f"&nbsp;&nbsp;&nbsp;&nbsp;Quantidade: <span class='terminal-accent'>{padrao}</span><br>"
+            
+            if frac > 0:
+                prefixo = "[2]" if padrao > 0 else "[1]"
+                guia_html += f"&nbsp;&nbsp;&nbsp;&nbsp;{prefixo} Código: <span class='terminal-accent'>{cod}F</span> (Fracionário)<br>"
+                guia_html += f"&nbsp;&nbsp;&nbsp;&nbsp;Quantidade: <span class='terminal-accent'>{frac}</span><br>"
+            
+            guia_html += f"&nbsp;&nbsp;&nbsp;&nbsp;Preço: A Mercado &rarr; **CLIQUE EM COMPRAR**<br>"
+            guia_html += f"&nbsp;&nbsp;&nbsp;&nbsp;(Motivo: {ativo['Status']})</p>"
+            
+        # === NOTA FINAL ===
+        sobra_vagas = 3 - len(final)
+        if sobra_vagas > 0:
+            val_sobra = capital * (sobra_vagas/3)
+            guia_html += f"<br><p>⚠️ **NOTA:** {sobra_vagas} vaga(s) não preenchida(s)."
+            guia_html += f" 👉 Aloque R$ <span class='terminal-accent'>{val_sobra:,.2f}</span> no Caixa ({ATIVO_CAIXA}).</p>"
 
-                st.markdown(html, unsafe_allow_html=True)
-
+    # === RODAPÉ ===
+    guia_html += "<hr style='border-color:#333;'>"
+    guia_html += "<p style='text-align:center'>🚀 OPERAÇÃO CONCLUÍDA. FECHE O APP E SÓ VOLTE MÊS QUE VEM!</p>"
+    
+    # RENDERIZAÇÃO FINAL NA TELA
+    st.markdown(f"<div class='terminal-box'>{guia_html}</div>", unsafe_allow_html=True)
+    
+    # 3. TABELA
     st.markdown("---")
-    with st.expander("🔍 Espião (Tabela Completa)"):
-        st.dataframe(df.style.map(lambda x: 'color:#ff4444' if 'VENDA' in str(x) else ('color:#00ff88' if 'COMPRA' in str(x) else 'color:#888'), subset=['Acao']))
+    with st.expander("🔍 Ver Tabela Técnica Completa"):
+        st.dataframe(df.style.map(lambda x: 'color:#ff4444' if 'VENDA' in str(x) else ('color:#00ff88' if 'COMPRA' in str(x) else 'color:#aaa'), subset=['Acao']))
 
 if __name__ == "__main__":
     main()
