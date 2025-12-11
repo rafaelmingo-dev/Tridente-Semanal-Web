@@ -117,48 +117,50 @@ def get_data_and_calculate():
     return pd.DataFrame(resultados)
 
 # ==============================================================================
-# 🎨 UI V.47 (TERMINAL VISUAL + ALTO CONTRASTE)
+# 🎨 UI V.48 (TERMINAL PURÍSSIMO)
 # ==============================================================================
+def formatar_instrucao_boleta(ativo, alocacao, qtd, padrao, frac, cod):
+    """Gera o bloco de texto formatado como o terminal original."""
+    
+    instrucao = f"**🏆 RANK #{i+1}: {ativo['Ticker']} ({ativo['Tipo']})**\n\n"
+    instrucao += f"💰 Valor para investir: **R$ {alocacao:,.2f}**\n"
+    instrucao += f"📊 Preço Atual: **R$ {ativo['Preco']:.2f}**\n\n"
+    instrucao += "📝 **COMO PREENCHER A ORDEM (BOLETA):**\n"
+
+    if padrao > 0:
+        instrucao += f"1. Digite o código: **{cod}** (Lote Padrão)\n"
+        instrucao += f"   Quantidade: **{padrao}**\n"
+        instrucao += f"   Preço: A Mercado\n\n"
+
+    if frac > 0:
+        prefixo = "2." if padrao > 0 else "1."
+        instrucao += f"{prefixo} Digite o código: **{cod}F** (Fracionário)\n"
+        instrucao += f"   Quantidade: **{frac}**\n"
+        instrucao += f"   Preço: A Mercado\n\n"
+    
+    instrucao += f"*(Motivo da escolha: {ativo['Status']})*\n"
+    
+    return instrucao
+
 def main():
     if not check_password(): return
 
-    st.set_page_config(page_title="Robô Tridente V.47", page_icon="🔱", layout="wide")
+    st.set_page_config(page_title="Robô Tridente V.48", page_icon="🔱", layout="wide")
     
-    # CSS para Styling
+    # CSS MÍNIMO PARA CORREÇÃO DE FUNDO E TEXTO
     st.markdown("""
     <style>
-    .stApp { background-color: #0b0c10; color: #fff; }
-    h1, h2, h3, h4 { color: #fff !important; }
-    
-    /* CABEÇALHO CENTRALIZADO */
-    .header-box { text-align: center; margin-bottom: 25px; }
-    .header-title { font-size: 36px; font-weight: 900; color: #fff; margin:0; }
-    
-    /* CARD GERAL */
-    .card-base {
-        background-color: #12141c; border: 1px solid #333; border-radius: 12px; padding: 15px; margin-bottom: 20px;
-    }
-    .card-title { font-size: 20px; font-weight: bold; color: #00ff88; margin-bottom: 10px; }
-    
-    /* VALORES DETALHADOS */
-    .detail-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
-    .detail-key { color: #888; font-size: 14px; }
-    .detail-val { color: #fff; font-weight: bold; font-size: 14px; }
-    
-    /* BOLETA TERMINAL STYLE */
-    .boleta-term {
-        background-color: #000; border: 1px solid #333; border-radius: 6px; padding: 10px; margin-top: 10px;
-        font-family: 'Courier New', monospace; color: #fff;
-    }
-    .boleta-tit { color: #58a6ff; font-weight: bold; font-size: 13px; margin-bottom: 5px; }
-    .boleta-code { color: #00ff88; font-weight: bold; }
-    .boleta-quant { color: #ffad57; font-weight: bold; }
-    .boleta-market { color: #58a6ff; font-weight: bold; }
+    .stApp { background-color: #000000; }
+    h1, h2, h3, h4 { color: #00ff88 !important; }
+    p, span, div, li { color: #f0f0f0; } /* Garante texto claro */
     </style>
     """, unsafe_allow_html=True)
 
-    # CABEÇALHO
-    st.markdown("<div class='header-box'><div class='header-title'>🔱 TRIDENTE V.47</div></div>", unsafe_allow_html=True)
+    # CABEÇALHO (O mais fiel ao terminal)
+    st.title("🔱 ROBÔ TRIDENTE V.48")
+    st.markdown("### Guia de Operação Profissional")
+    st.markdown(f"**Data da Análise:** {datetime.now().strftime('%d/%m/%Y')}")
+    st.divider()
 
     # SIDEBAR
     with st.sidebar:
@@ -186,31 +188,26 @@ def main():
     if vagas > 0: final.extend(defesa.head(vagas).to_dict('records'))
 
     # ==========================================================================
-    # 1. VENDAS (PASSO A PASSO)
+    # 1. VENDAS (PASSO 1)
     # ==========================================================================
-    st.markdown("## 1️⃣ FAZER CAIXA (VENDER)")
+    st.markdown("## 1️⃣ PASSO 1: FAZER CAIXA (VENDER)")
+    
     if not vendas.empty:
         st.warning("⚠️ Venda estes ativos para liberar caixa.")
         
         cols = st.columns(3)
         for idx, row in enumerate(vendas.to_dict('records')):
             with cols[idx % 3]:
-                st.markdown(f"""
-                <div class='card-base' style='border-color:#ff4444;'>
-                    <div class='sell-tit'>❌ {row['Ticker']}</div>
-                    <div class='sell-sub'>Motivo: {row['Status']}</div>
-                    <div class='sell-sub'>Preço Ref: R$ {row['Preco']:.2f}</div>
-                </div>
-                """, unsafe_allow_html=True)
+                st.error(f"❌ {row['Ticker']}\n\nMotivo: {row['Status']}\n\nPreço Ref: R$ {row['Preco']:.2f}")
     else:
         st.success("✅ Nenhuma venda necessária.")
 
     st.markdown("---")
 
     # ==========================================================================
-    # 2. COMPRAS (VISUAL PERFEITO + PASSO A PASSO)
+    # 2. COMPRAS (PASSO 2) - VISUAL FIEL
     # ==========================================================================
-    st.subheader("2️⃣ NOVAS COMPRAS")
+    st.subheader("2️⃣ PASSO 2: COMPRAR NOVOS ATIVOS")
     
     if not final:
         st.error(f"Fique 100% no CAIXA ({ATIVO_CAIXA}).")
@@ -226,49 +223,23 @@ def main():
                 frac = qtd % 100
                 cod = ativo['Ticker'].replace('.SA', '')
                 
-                # Montagem do Bloco de Instrução Terminal-Like
-                boleta_content = ""
+                # Monta a instrução formatada
+                instrucao_completa = formatar_instrucao_boleta(ativo, alo, qtd, padrao, frac, cod)
                 
-                if padrao > 0:
-                    boleta_content += f"<p class='boleta-row'><span class='boleta-key'>1. Lote Padrão:</span><span class='boleta-val'>{padrao} x {cod}</span></p>"
-                
-                if frac > 0:
-                    lbl = "Opção 2 (Sobra):" if padrao > 0 else "Opção Única:"
-                    boleta_content += f"<p class='boleta-row'><span class='boleta-key'>{lbl}:</span><span class='boleta-val'>{frac} x {cod}F</span></p>"
-
-                # CARD DE COMPRA
-                st.markdown(f"""
-                <div class="card-buy">
-                    <div class="buy-head">
-                        <span class="buy-ticker">{ativo['Ticker']}</span>
-                        <span class="buy-badge">RANK #{i+1}</span>
-                    </div>
-                    <div class="buy-content">
-                        <div class="money-row">
-                            <div>
-                                <div class="val-lbl">INVESTIR</div>
-                                <div class="val-big">R$ {alo:,.0f}</div>
-                            </div>
-                            <div style="text-align:right">
-                                <div class="val-lbl">PREÇO REF</div>
-                                <div class="val-prc">R$ {ativo['Preco']:.2f}</div>
-                            </div>
-                        </div>
-                        
-                        <div class="boleta-box">
-                            <div class="boleta-tit">📝 INSTRUÇÕES DE BOLETA:</div>
-                            {boleta_content}
-                            <hr style="border-color:#333;">
-                            <p style="text-align:center; margin:0; color:#00ff88; font-weight:bold;">COMPRAR A MERCADO</p>
-                        </div>
-                        <p style="text-align:center; font-size:12px; color:#888; margin-top:8px;">Motivo: {ativo['Status']}</p>
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
+                # Exibe o card com o texto puro, garantindo a fidelidade do layout
+                with st.container(border=True):
+                    st.markdown(instrucao_completa)
+                    st.button(f"✅ COMPRAR {ativo['Ticker']}", key=f"btn_{i}")
+        
+        # Nota de Sozinho
+        sobra_vagas = 3 - len(final)
+        if sobra_vagas > 0:
+            val_sobra = capital * (sobra_vagas/3)
+            st.info(f"⚠️ NOTA: {sobra_vagas} vaga(s) não preenchida(s). Aloque R$ {val_sobra:,.2f} no Caixa ({ATIVO_CAIXA}).")
 
     # 3. TABELA
     st.markdown("---")
-    with st.expander("🔍 Espião (Tabela Completa)"):
+    with st.expander("🔍 Espião (Tabela Técnica Completa)"):
         st.dataframe(df.style.map(lambda x: 'color:#ff4444' if 'VENDA' in str(x) else ('color:#00ff88' if 'COMPRA' in str(x) else 'color:#aaa'), subset=['Acao']))
 
 if __name__ == "__main__":
