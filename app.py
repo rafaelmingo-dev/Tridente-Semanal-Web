@@ -146,7 +146,7 @@ def get_data_and_calculate():
     return pd.DataFrame(resultados)
 
 # ==============================================================================
-# 🎨 INTERFACE VISUAL — GUIA OPERACIONAL
+# 🎨 INTERFACE VISUAL — ASCII GUIA (FORMATO IGUAL AO EXEMPLO)
 # ==============================================================================
 def main():
 
@@ -163,6 +163,7 @@ def main():
             st.cache_data.clear()
             st.rerun()
 
+    # Faz o download e cálculos
     with st.spinner("📡 Conectando à Bolsa (B3)..."):
         df = get_data_and_calculate()
 
@@ -170,14 +171,10 @@ def main():
         st.error("Erro ao baixar dados. Tente novamente.")
         return
 
-    # ================================
-    # SEPARAÇÃO — (LÓGICA INALTERADA)
-    # ================================
+    # Separações e seleção (LÓGICA INALTERADA)
     vendas = df[df['Acao'] == 'VENDA'].sort_values("Ticker")
-    compras_ataque = df[(df['Acao'] == 'COMPRA') &
-                        (df['Tipo'] == '⚔️ ATAQUE')].sort_values('Score', ascending=False)
-    compras_defesa = df[(df['Acao'] == 'COMPRA') &
-                        (df['Tipo'] == '🛡️ DEFESA')].sort_values('Score', ascending=False)
+    compras_ataque = df[(df['Acao'] == 'COMPRA') & (df['Tipo'] == '⚔️ ATAQUE')].sort_values('Score', ascending=False)
+    compras_defesa = df[(df['Acao'] == 'COMPRA') & (df['Tipo'] == '🛡️ DEFESA')].sort_values('Score', ascending=False)
 
     carteira_final = []
     carteira_final.extend(compras_ataque.head(3).to_dict("records"))
@@ -185,70 +182,112 @@ def main():
     if vagas > 0:
         carteira_final.extend(compras_defesa.head(vagas).to_dict("records"))
 
+    # Montagem do bloco ASCII idêntico ao exemplo
     hoje = datetime.now().strftime("%d/%m/%Y")
+    total_tickers = len(TICKERS)
+    last_ticker = TICKERS[-1] if TICKERS else ""
 
-    # ================================
-    # GUIA OPERACIONAL — VISUAL NOVO
-    # ================================
-    st.markdown(f"# 📘 GUIA DE OPERAÇÃO PARA INICIANTES | {hoje}")
-    st.markdown("---")
+    # LINHA SUPERIOR (comprimento similar ao exemplo)
+    top_line = "█" * 100
 
-    # =====================================
-    # 1️⃣ PASSO 1 — FAZER CAIXA (VENDAS)
-    # =====================================
-    st.markdown("### 1️⃣ PASSO 1: FAZER CAIXA (VENDER)")
+    # CHECKLIST INICIAL e processamento (estático/formatado)
+    checklist = [
+        " 📝 CHECKLIST INICIAL:",
+        "    1. Abra o app da sua corretora.",
+        "    2. Veja quanto você tem de SALDO LIVRE + Valor das Ações do Robô (se já tiver).",
+        "    3. Vamos calcular exatamente o que comprar (Lote Padrão vs Fracionário).",
+        "",
+        f" 👉 Digite seu PATRIMÔNIO TOTAL para a estratégia (R$): {capital:,.0f}",
+        "",
+        " 📡 O Robô está analisando os gráficos SEMANAIS...",
+        f"    Processando {total_tickers}/{total_tickers}: {last_ticker}...",
+        " ✅ Análise Completa.",
+    ]
 
-    if vendas.empty:
-        st.success("Nenhum ativo precisa ser vendido hoje! ✔️")
+    # PASSO 1: VENDAS (formata cada venda)
+    vendas_lines = []
+    for _, row in vendas.iterrows():
+        vendas_lines.append(f"      ❌ {row['Ticker']} -> Motivo: {row['Status']}")
+
+    # PASSO 2: RANKS (monta cada bloco)
+    invest_amount = capital / 3 if len(carteira_final) > 0 else 0
+    ranks_blocks = []
+    for i, ativo in enumerate(carteira_final, start=1):
+        preco = ativo['Preco']
+        qtd = int(invest_amount / preco) if preco > 0 else 0
+        score = ativo.get('Score', 0.0)
+        ranks_blocks.append(
+            {
+                "rank": i,
+                "ticker": ativo['Ticker'],
+                "tipo": ativo['Tipo'],
+                "invest": invest_amount,
+                "preco": preco,
+                "qtd": qtd,
+                "score": score,
+                "motivo": ativo['Status']
+            }
+        )
+
+    # Monta o texto final monoespaçado (igual estilo)
+    lines = []
+    lines.append(top_line)
+    lines.append(" 🔱 ROBÔ TRIDENTE V.42 | GUIA PASSO A PASSO (INICIANTE)")
+    lines.append(top_line)
+    lines.append("")  # linha em branco
+    lines.extend(checklist)
+    lines.append("")  # linha em branco
+    lines.append("=" * 100)
+    lines.append(f"📘 GUIA DE OPERAÇÃO PARA INICIANTES | {hoje}")
+    lines.append("=" * 100)
+    lines.append("")  # linha em branco
+
+    # PASSO 1
+    lines.append("1️⃣  PASSO 1: FAZER CAIXA (VENDER)")
+    lines.append("    Verifique sua carteira atual. Se você tiver algum destes ativos, VENDA TUDO.")
+    lines.append("    (Use a opção 'Venda a Mercado' no seu Home Broker)")
+    if vendas_lines:
+        for vl in vendas_lines:
+            lines.append(f"    {vl}")
     else:
-        st.write("Verifique sua carteira. Se possuir algum destes ativos, **venda tudo hoje**:")
+        lines.append("    ✅ Nenhuma venda necessária hoje.")
+    lines.append("    💵 O dinheiro dessas vendas será usado no Passo 2.")
+    lines.append("-" * 100)
 
-        for idx, row in vendas.iterrows():
-            st.markdown(f"**❌ {row['Ticker']}** — Motivo: **{row['Status']}**")
+    # PASSO 2
+    lines.append("2️⃣  PASSO 2: COMPRAR NOVOS ATIVOS")
+    lines.append(f"    Vamos distribuir seus R$ {capital:,.2f} igualmente nos 3 melhores ativos.")
+    lines.append("")
 
-        st.info("💵 O dinheiro destas vendas será usado no Passo 2.")
-
-    st.markdown("---")
-
-    # =====================================
-    # 2️⃣ PASSO 2 — COMPRAR ATIVOS
-    # =====================================
-    st.markdown("### 2️⃣ PASSO 2: COMPRAR NOVOS ATIVOS")
-
-    if not carteira_final:
-        st.error(f"Mercado ruim. Fique 100% no CAIXA ({ATIVO_CAIXA}).")
+    if not ranks_blocks:
+        lines.append(f"   ❌ Mercado ruim. Fique 100% no CAIXA ({ATIVO_CAIXA})")
     else:
-        peso = 1 / len(carteira_final)
+        for b in ranks_blocks:
+            lines.append("")
+            lines.append("   " + "=" * 59)
+            lines.append(f"   🏆 RANK #{b['rank']}: {b['ticker']} ({b['tipo']})")
+            lines.append("   " + "=" * 59)
+            lines.append(f"      💰 Valor para investir: R$ {b['invest']:,.2f}")
+            lines.append(f"      📊 Preço Atual:         R$ {b['preco']:,.2f}")
+            lines.append("      📝 COMO PREENCHER A ORDEM (BOLETA):")
+            lines.append(f"      [2] Digite o código: {b['ticker'].replace('.SA','')}F (Com o 'F' no final)")
+            lines.append(f"          Quantidade:      {b['qtd']}")
+            lines.append(f"          Preço:           A Mercado")
+            lines.append(f"          👉 CLIQUE EM COMPRAR")
+            lines.append(f"      (Motivo da escolha: {b['motivo'] if b['motivo'] else f'SCORE {b['score']:.2f}'})")
+            lines.append("")
 
-        for i, ativo in enumerate(carteira_final, start=1):
-            alo = capital * peso
-            preco = ativo["Preco"]
-            qtd_total = int(alo / preco)
-            cod = ativo["Ticker"].replace(".SA", "")
+    lines.append("=" * 100)
+    lines.append("🚀 OPERAÇÃO CONCLUÍDA. FECHE O APP E SÓ VOLTE MÊS QUE VEM!")
+    lines.append("=" * 100)
+    lines.append("[Pressione ENTER para encerrar]")
 
-            st.markdown("---")
-            st.markdown(f"## 🏆 RANK #{i}: {ativo['Ticker']} ({ativo['Tipo']})")
+    banner_text = "\n".join(lines)
 
-            st.markdown(f"""
-            **💰 Valor para investir:** R$ {alo:,.2f}  
-            **📊 Preço Atual:** R$ {preco:.2f}  
-            """)
+    # Exibe o bloco monoespaçado no Streamlit
+    st.code(banner_text, language='text')
 
-            st.markdown("### 📝 COMO PREENCHER A ORDEM (BOLETA):")
-            st.markdown(f"""
-            - Digite o código: **{cod}F**  
-            - Quantidade: **{qtd_total}**  
-            - Preço: **A Mercado**  
-            - 👉 Clique em **COMPRAR**
-            """)
-
-            st.caption(f"Motivo da escolha: **{ativo['Status']}**")
-
-    st.markdown("---")
-
-    # =====================================
-    # 3️⃣ DETALHES TÉCNICOS (ESPIÃO)
-    # =====================================
+    # Mantém a tabela detalhada para quem quiser ver os números brutos
     with st.expander("🔍 Ver Detalhes Técnicos (Tabela Completa)"):
         st.dataframe(
             df.style.map(
