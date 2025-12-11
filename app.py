@@ -5,18 +5,21 @@ import numpy as np
 from datetime import datetime, timedelta
 
 # ==============================================================================
-# 🔐 SEGURANÇA
+# 🔐 SEGURANÇA (LOGIN)
 # ==============================================================================
 SENHA_ACESSO = "tridente2025" 
 
 def check_password():
+    """Retorna True se o usuário estiver logado."""
     if "password_correct" not in st.session_state:
         st.session_state["password_correct"] = False
+
     if st.session_state["password_correct"]:
         return True
+
+    st.markdown("## 🔐 Robô Tridente V.42 - Acesso Restrito")
+    password = st.text_input("Digite a senha:", type="password")
     
-    st.markdown("## 🔐 Acesso Restrito - Robô V.41")
-    password = st.text_input("Senha:", type="password")
     if st.button("Entrar"):
         if password == SENHA_ACESSO:
             st.session_state["password_correct"] = True
@@ -64,7 +67,7 @@ ATAQUE = [t for t in TICKERS if t not in DEFESA]
 
 @st.cache_data(ttl=3600)
 def get_data_and_calculate():
-    dias = (5 * 365)
+    dias = (5 * 365) 
     start = (datetime.now() - timedelta(days=dias)).strftime('%Y-%m-%d')
     try:
         data = yf.download(TICKERS, start=start, interval='1wk', progress=False, group_by='ticker', auto_adjust=True)
@@ -79,6 +82,7 @@ def get_data_and_calculate():
             close = df['Close']
             P = CATALOGO[t]
             
+            # --- CÁLCULOS IDÊNTICOS AO BACKTEST V.31 ---
             atual = float(close.iloc[-1])
             sma = close.rolling(P['MM']).mean().iloc[-1]
             dist = (atual / sma) - 1
@@ -99,9 +103,10 @@ def get_data_and_calculate():
                 safe_vol = vol if vol > 0.01 else 0.01
                 score = 1 / safe_vol
 
+            # JULGAMENTO (REGRAS V.31)
             acao = "COMPRA"
             status = f"SCORE {score:.2f}"
-            tipo = "ATAQUE" if t in ATAQUE else "DEFESA"
+            tipo = "⚔️ ATAQUE" if t in ATAQUE else "🛡️ DEFESA"
             
             if dist < 0: acao = "VENDA"; status = f"ABAIXO DA MÉDIA (MM{P['MM']})"
             elif vol > P['VOL_LIMIT']: acao = "VENDA"; status = f"RISCO ALTO (Vol {vol:.2f})"
@@ -117,102 +122,99 @@ def get_data_and_calculate():
     return pd.DataFrame(resultados)
 
 # ==============================================================================
-# 🎨 UI BLINDADA (SEM ERROS DE HTML)
+# 🎨 INTERFACE VISUAL V.42 (NATIVA & ROBUSTA)
 # ==============================================================================
 def main():
     if not check_password(): return
 
-    st.set_page_config(page_title="Robô Tridente V.41", page_icon="🔱", layout="wide")
+    st.set_page_config(page_title="Robô Tridente V.42", page_icon="🔱", layout="wide")
     
-    # ESTILIZAÇÃO GLOBAL SEGURA
+    # CSS para deixar o visual nativo mais bonito
     st.markdown("""
     <style>
-    /* Fundo e Texto */
-    .stApp { background-color: #0e1117; color: #ffffff; }
-    
-    /* Headers */
-    h1, h2, h3 { color: #ffffff !important; }
-    
-    /* Métricas */
-    div[data-testid="stMetricValue"] { font-size: 26px; color: #4caf50; }
-    div[data-testid="stMetricLabel"] { font-size: 14px; color: #aaaaaa; }
-    
-    /* Containers Customizados */
-    div[data-testid="stExpander"] { background-color: #161b22; border: 1px solid #30363d; }
+    .stApp { background-color: #0E1117; }
+    h1 { color: #FFFFFF; text-align: center; }
+    h3 { color: #CCCCCC; }
+    .stSuccess { background-color: #1b5e20; color: white; }
+    .stError { background-color: #3a0000; color: white; }
+    .stWarning { background-color: #3a2a00; color: white; }
+    div[data-testid="stMetricValue"] { font-size: 24px; color: #4CAF50; }
     </style>
     """, unsafe_allow_html=True)
 
-    # CABEÇALHO
-    st.title("🔱 ROBÔ TRIDENTE V.41")
-    st.markdown("#### Painel de Execução Profissional | Equal Weight (33%)")
+    st.title("🔱 ROBÔ TRIDENTE V.42")
+    st.markdown("### Painel de Execução (Equal Weight 33%)")
     st.divider()
 
+    # Sidebar
     with st.sidebar:
-        st.header("💰 Carteira")
+        st.header("💰 Sua Carteira")
         capital = st.number_input("Patrimônio Total (R$)", min_value=0.0, value=2000.0, step=100.0)
         if st.button("🔄 Rodar Análise"):
             st.cache_data.clear()
             st.rerun()
         st.info("Estratégia Otimizada V.31")
 
-    with st.spinner('📡 Analisando...'):
+    # Processamento
+    with st.spinner('📡 Conectando à Bolsa (B3)...'):
         df = get_data_and_calculate()
 
     if df.empty:
-        st.error("Erro ao baixar dados.")
+        st.error("Erro ao baixar dados. Tente novamente.")
         return
 
+    # Separação
     vendas = df[df['Acao'] == 'VENDA']
-    ataque = df[(df['Acao'] == 'COMPRA') & (df['Tipo'] == 'ATAQUE')].sort_values('Score', ascending=False)
-    defesa = df[(df['Acao'] == 'COMPRA') & (df['Tipo'] == 'DEFESA')].sort_values('Score', ascending=False)
+    compras_ataque = df[(df['Acao'] == 'COMPRA') & (df['Tipo'] == '⚔️ ATAQUE')].sort_values('Score', ascending=False)
+    compras_defesa = df[(df['Acao'] == 'COMPRA') & (df['Tipo'] == '🛡️ DEFESA')].sort_values('Score', ascending=False)
 
-    final = []
-    final.extend(ataque.head(3).to_dict('records'))
-    vagas = 3 - len(final)
-    if vagas > 0: final.extend(defesa.head(vagas).to_dict('records'))
+    carteira_final = []
+    carteira_final.extend(compras_ataque.head(3).to_dict('records'))
+    vagas = 3 - len(carteira_final)
+    if vagas > 0: carteira_final.extend(compras_defesa.head(vagas).to_dict('records'))
 
     # ==========================================================================
-    # 1. ALERTAS DE VENDA
+    # 1. ÁREA DE VENDAS
     # ==========================================================================
     if not vendas.empty:
-        st.subheader("1️⃣ VENDAS NECESSÁRIAS")
-        st.warning("Venda estes ativos para liberar caixa.")
+        st.subheader("1️⃣ ALERTAS DE VENDA (FAZER CAIXA)")
+        st.warning("Verifique sua carteira. Se tiver algum destes ativos, venda hoje.")
         
         cols = st.columns(4)
         for idx, row in enumerate(vendas.to_dict('records')):
             with cols[idx % 4]:
                 with st.container(border=True):
                     st.markdown(f"### ❌ {row['Ticker']}")
-                    st.caption(f"Ref: R$ {row['Preco']:.2f}")
+                    st.write(f"Ref: **R$ {row['Preco']:.2f}**")
                     st.error(f"{row['Status']}")
     else:
-        st.success("✅ Nenhuma venda necessária.")
+        st.success("✅ Nenhuma venda necessária hoje.")
 
     st.markdown("---")
 
     # ==========================================================================
-    # 2. NOVAS COMPRAS (VISUAL NATIVO + DETALHADO)
+    # 2. ÁREA DE COMPRAS (PASSO A PASSO DETALHADO)
     # ==========================================================================
-    st.subheader("2️⃣ NOVAS COMPRAS (PASSO A PASSO)")
+    st.subheader("2️⃣ NOVAS COMPRAS")
     
-    if not final:
+    if not carteira_final:
         st.error(f"Mercado Ruim. Fique 100% no CAIXA ({ATIVO_CAIXA}).")
     else:
-        peso = 1.0 / len(final)
-        cols = st.columns(len(final))
+        peso = 1.0 / len(carteira_final)
+        cols = st.columns(len(carteira_final))
         
-        for i, ativo in enumerate(final):
+        for i, ativo in enumerate(carteira_final):
             with cols[i]:
-                # CÁLCULOS
+                # Cálculos
                 alo = capital * peso
                 qtd = int(alo / ativo['Preco'])
                 padrao = (qtd // 100) * 100
                 frac = qtd % 100
                 cod = ativo['Ticker'].replace('.SA', '')
                 
-                # CARD VERDE (ESTILIZADO VIA CONTAINER NATIVO)
+                # CARD NATIVO (IMPOSSÍVEL DE QUEBRAR)
                 with st.container(border=True):
-                    # Título com Rank e Nome
+                    # Cabeçalho
                     st.markdown(f"#### 🏆 Rank #{i+1}")
                     st.markdown(f"## {ativo['Ticker']}")
                     st.caption(f"Tipo: {ativo['Tipo']}")
@@ -224,34 +226,32 @@ def main():
                     c1.metric("Investir", f"R$ {alo:,.0f}")
                     c2.metric("Preço", f"R$ {ativo['Preco']:.2f}")
                     
-                    st.divider()
-                    
-                    # PASSO A PASSO (TEXTO NATIVO - IMPOSSÍVEL DE QUEBRAR)
-                    st.markdown("**📝 NA CORRETORA:**")
+                    # Instruções Claras (Igual ao Terminal)
+                    st.markdown("#### 📝 NA CORRETORA:")
                     
                     if padrao > 0:
-                        st.markdown(f"""
-                        **Opção 1 (Lote Padrão):**
-                        - Código: `{cod}`
-                        - Quantidade: **{padrao}**
-                        """)
+                        st.text("Opção 1 (Lote Padrão):")
+                        st.markdown(f"- Código: **{cod}**")
+                        st.markdown(f"- Quantidade: **{padrao}**")
+                        st.markdown("- Preço: **A Mercado**")
+                        st.divider()
                     
                     if frac > 0:
-                        lbl = "Opção 2 (Sobra):" if padrao > 0 else "Opção Única:"
-                        st.markdown(f"""
-                        **{lbl}**
-                        - Código: `{cod}F`
-                        - Quantidade: **{frac}**
-                        """)
+                        label = "Opção 2 (Sobra):" if padrao > 0 else "Opção Única (Fracionário):"
+                        st.text(label)
+                        st.markdown(f"- Código: **{cod}F**")
+                        st.markdown(f"- Quantidade: **{frac}**")
+                        st.markdown("- Preço: **A Mercado**")
                     
+                    st.divider()
                     st.caption(f"Motivo: {ativo['Status']}")
-                    st.success("✅ COMPRAR A MERCADO")
+                    st.button(f"✅ Confirmar {ativo['Ticker']}", key=f"btn_{i}")
 
     # ==========================================================================
-    # 3. TABELA ESPIÃO
+    # 3. ESPIÃO
     # ==========================================================================
     st.markdown("---")
-    with st.expander("🔍 Ver Detalhes Técnicos (Espião)"):
+    with st.expander("🔍 Ver Detalhes Técnicos (Tabela Completa)"):
         st.dataframe(
             df.style.map(lambda x: 'color:#ff4b4b' if 'VENDA' in str(x) else ('color:#4caf50' if 'COMPRA' in str(x) else 'color:#aaa'), subset=['Acao']),
             use_container_width=True
