@@ -15,7 +15,7 @@ def check_password():
     if st.session_state["password_correct"]:
         return True
     
-    st.markdown("## 🔐 Acesso Restrito - V.43")
+    st.markdown("## 🔐 Acesso Restrito - Robô Tridente")
     password = st.text_input("Senha:", type="password")
     if st.button("Entrar"):
         if password == SENHA_ACESSO:
@@ -26,7 +26,7 @@ def check_password():
     return False
 
 # ==============================================================================
-# ⚙️ LÓGICA V.31 (MATEMÁTICA PURA)
+# ⚙️ LÓGICA V.31 (MATEMÁTICA PURA) - INALTERADA
 # ==============================================================================
 ATIVO_CAIXA = 'B5P211.SA'
 
@@ -117,91 +117,68 @@ def get_data_and_calculate():
     return pd.DataFrame(resultados)
 
 # ==============================================================================
-# 🎨 UI V.43 (DESIGN ALTO CONTRASTE E LEGIBILIDADE)
+# 🎨 UI V.44 (HTML BLINDADO E CONCATENADO)
 # ==============================================================================
 def main():
     if not check_password(): return
 
-    st.set_page_config(page_title="Robô Tridente V.43", page_icon="🔱", layout="wide")
+    st.set_page_config(page_title="Robô Tridente V.44", page_icon="🔱", layout="wide")
     
-    # CSS CORRIGIDO PARA VISIBILIDADE
+    # CSS OTIMIZADO
     st.markdown("""
     <style>
-    /* FUNDO */
-    .stApp { background-color: #0b0c10; }
+    .stApp { background-color: #0b0c10; color: #fff; }
+    h1, h2, h3 { color: #fff !important; }
     
-    /* CARD VENDA (VERMELHO VIVO) */
+    /* CARD VENDA */
     .card-sell {
-        background: #2c0b0b;
-        border: 2px solid #ff0000;
-        border-radius: 12px;
-        padding: 15px;
-        margin-bottom: 10px;
+        background: #2b0e0e; border: 1px solid #ff4444; border-radius: 8px; padding: 15px; margin-bottom: 10px;
     }
-    .sell-tit { color: #ff4d4d; font-size: 20px; font-weight: 900; }
-    .sell-sub { color: #ffffff; font-size: 14px; margin-top: 5px; }
-    .sell-bg  { background: #500000; color: #ffcccc; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+    .sell-tit { color: #ff6666; font-size: 18px; font-weight: bold; margin: 0; }
+    .sell-sub { color: #fff; font-size: 13px; }
 
-    /* CARD COMPRA (VERDE NEON + CINZA LEGÍVEL) */
+    /* CARD COMPRA */
     .card-buy {
-        background-color: #1c1e26; /* Cinza chumbo claro para contraste */
-        border: 2px solid #00ff88; /* Borda Verde Neon */
-        border-radius: 15px;
-        overflow: hidden;
-        margin-bottom: 25px;
-        box-shadow: 0 4px 20px rgba(0,255,136,0.15);
+        background-color: #12141c; border: 2px solid #00ff88; border-radius: 12px; margin-bottom: 20px; overflow: hidden;
     }
     .buy-head {
-        background: linear-gradient(90deg, #004d26 0%, #002e16 100%);
-        padding: 15px 20px;
-        display: flex; justify-content: space-between; align-items: center;
-        border-bottom: 1px solid #00ff88;
+        background: #002e16; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #00ff88;
     }
-    .buy-tit { color: #ffffff; font-size: 26px; font-weight: 900; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-    .buy-rnk { color: #00ff88; font-size: 12px; font-weight: bold; letter-spacing: 1px; border: 1px solid #00ff88; padding: 3px 8px; border-radius: 4px; }
+    .buy-tit { color: #fff; font-size: 22px; font-weight: 900; margin: 0; }
+    .buy-bg { background: #000; color: #00ff88; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
     
-    .buy-body { padding: 20px; }
-    
-    /* VALORES */
-    .val-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; }
-    .val-big { font-size: 32px; font-weight: 800; color: #00ff88; line-height: 1; }
-    .val-lbl { font-size: 12px; color: #cccccc; text-transform: uppercase; margin-bottom: 5px; font-weight: bold; }
-    .val-prc { font-size: 16px; color: #ffffff; font-weight: bold; text-align: right; }
+    .buy-body { padding: 15px; }
+    .money-row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 15px; }
+    .money-val { font-size: 28px; font-weight: 800; color: #00ff88; line-height: 1; }
+    .money-lbl { font-size: 11px; color: #aaa; text-transform: uppercase; }
+    .money-prc { font-size: 14px; color: #fff; text-align: right; }
 
-    /* BOLETA BOX (CONTRASTE MÁXIMO) */
-    .boleta {
-        background-color: #000000; /* Fundo Preto Puro */
-        border: 1px solid #444;
-        border-radius: 8px;
-        padding: 15px;
+    /* BOLETA TABLE STYLE */
+    .boleta-box {
+        background-color: #000; border: 1px solid #333; border-radius: 6px; padding: 10px; border-left: 4px solid #00ff88;
     }
-    .bol-head { color: #58a6ff; font-size: 12px; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; border-bottom: 1px solid #333; padding-bottom: 5px; }
-    
-    .bol-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; border-bottom: 1px dashed #333; padding-bottom: 4px; }
-    .bol-row:last-child { border: none; }
-    .bol-k { color: #aaaaaa; } /* Cinza claro */
-    .bol-v { color: #ffffff; font-weight: bold; font-family: monospace; font-size: 15px; } /* Branco Puro */
-    
-    .motivo { text-align: center; margin-top: 15px; font-size: 12px; color: #888; }
+    .boleta-tit { color: #58a6ff; font-size: 12px; font-weight: bold; margin-bottom: 5px; border-bottom: 1px solid #333; padding-bottom: 5px; }
+    .bol-row { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 13px; color: #ddd; }
+    .bol-val { color: #fff; font-weight: bold; font-family: monospace; }
     </style>
     """, unsafe_allow_html=True)
 
-    st.title("🔱 ROBÔ TRIDENTE V.43")
-    st.markdown("#### Painel Profissional | Alto Contraste")
+    st.title("🔱 ROBÔ TRIDENTE V.44")
+    st.markdown("#### Painel Profissional | Equal Weight (33%)")
 
     with st.sidebar:
         st.header("💰 Carteira")
-        capital = st.number_input("Patrimônio Total (R$)", min_value=0.0, value=2000.0, step=100.0)
-        if st.button("🔄 Rodar Análise"):
+        capital = st.number_input("Patrimônio (R$)", min_value=0.0, value=2000.0, step=100.0)
+        if st.button("🔄 Rodar"):
             st.cache_data.clear()
             st.rerun()
-        st.info("Estratégia Equal Weight (33%)")
+        st.info("Estratégia V.31 Otimizada")
 
     with st.spinner('📡 Analisando...'):
         df = get_data_and_calculate()
 
     if df.empty:
-        st.error("Erro na conexão.")
+        st.error("Erro Conexão B3.")
         return
 
     vendas = df[df['Acao'] == 'VENDA']
@@ -213,25 +190,26 @@ def main():
     vagas = 3 - len(final)
     if vagas > 0: final.extend(defesa.head(vagas).to_dict('records'))
 
-    # 1. VENDAS
+    # VENDAS
     if not vendas.empty:
-        st.subheader("1️⃣ VENDAS NECESSÁRIAS")
+        st.subheader("1️⃣ VENDAS")
         cols = st.columns(3)
         for idx, row in enumerate(vendas.to_dict('records')):
             with cols[idx % 3]:
-                st.markdown(f"""
-                <div class="card-sell">
-                    <div class="sell-tit">❌ {row['Ticker']}</div>
-                    <div class="sell-sub">Ref: <b>R$ {row['Preco']:.2f}</b></div>
-                    <div style="margin-top:8px"><span class="sell-bg">{row['Status']}</span></div>
-                </div>
-                """, unsafe_allow_html=True)
+                # HTML CONCATENADO PARA NAO QUEBRAR
+                html = ""
+                html += f"<div class='card-sell'>"
+                html += f"<div class='sell-tit'>❌ {row['Ticker']}</div>"
+                html += f"<div class='sell-sub'>Ref: R$ {row['Preco']:.2f}</div>"
+                html += f"<div class='sell-sub' style='color:#ffaaaa'>{row['Status']}</div>"
+                html += f"</div>"
+                st.markdown(html, unsafe_allow_html=True)
     else:
         st.success("✅ Nenhuma venda necessária.")
 
     st.markdown("---")
 
-    # 2. COMPRAS
+    # COMPRAS
     st.subheader("2️⃣ NOVAS COMPRAS")
     
     if not final:
@@ -248,55 +226,38 @@ def main():
                 frac = qtd % 100
                 cod = ativo['Ticker'].replace('.SA', '')
                 
-                # HTML BOLETA
-                html_bol = ""
+                # MONTAGEM SEGURA DO HTML (SEM IDENTAÇÃO INTERNA)
+                html = ""
+                html += f"<div class='card-buy'>"
+                html += f"<div class='buy-head'>"
+                html += f"<span class='buy-tit'>{ativo['Ticker']}</span>"
+                html += f"<span class='buy-bg'>RANK #{i+1}</span>"
+                html += f"</div>"
+                
+                html += f"<div class='buy-body'>"
+                html += f"<div class='money-row'>"
+                html += f"<div><div class='money-lbl'>INVESTIR</div><div class='money-val'>R$ {alo:,.0f}</div></div>"
+                html += f"<div class='money-prc'>Preço<br>R$ {ativo['Preco']:.2f}</div>"
+                html += f"</div>"
+                
+                html += f"<div class='boleta-box'>"
+                html += f"<div class='boleta-tit'>📝 NA CORRETORA</div>"
+                
                 if padrao > 0:
-                    html_bol += f"""
-                    <div class="bol-row">
-                        <span class="bol-k">Opção 1 (Lote):</span>
-                        <span class="bol-v">{padrao} x {cod}</span>
-                    </div>
-                    """
+                    html += f"<div class='bol-row'><span>Opção 1 (Lote):</span><span class='bol-val'>Comprar {padrao} x {cod}</span></div>"
+                
                 if frac > 0:
                     lbl = "Opção 2 (Sobra):" if padrao > 0 else "Opção Única:"
-                    html_bol += f"""
-                    <div class="bol-row">
-                        <span class="bol-k">{lbl}</span>
-                        <span class="bol-v">{frac} x {cod}F</span>
-                    </div>
-                    """
+                    html += f"<div class='bol-row'><span>{lbl}</span><span class='bol-val'>Comprar {frac} x {cod}F</span></div>"
+                
+                html += f"<div style='border-top:1px dashed #333; margin-top:5px; padding-top:5px; text-align:center; font-size:12px; color:#666;'>Ordem a Mercado</div>"
+                html += f"</div>" # fecha boleta
+                
+                html += f"<div style='text-align:center; margin-top:10px; font-size:11px; color:#888;'>Motivo: {ativo['Status']}</div>"
+                html += f"</div>" # fecha body
+                html += f"</div>" # fecha card
 
-                st.markdown(f"""
-                <div class="card-buy">
-                    <div class="buy-head">
-                        <span class="buy-tit">{ativo['Ticker']}</span>
-                        <span class="buy-rnk">RANK #{i+1}</span>
-                    </div>
-                    <div class="buy-body">
-                        <div class="val-row">
-                            <div>
-                                <div class="val-lbl">Investir</div>
-                                <div class="val-big">R$ {alo:,.0f}</div>
-                            </div>
-                            <div style="text-align:right">
-                                <div class="val-lbl">Preço</div>
-                                <div class="val-prc">R$ {ativo['Preco']:.2f}</div>
-                            </div>
-                        </div>
-                        
-                        <div class="boleta">
-                            <div class="bol-head">📝 NA CORRETORA</div>
-                            {html_bol}
-                            <div class="bol-row" style="margin-top:8px; border-top:1px solid #333; padding-top:5px;">
-                                <span class="bol-k">Preço Limite:</span>
-                                <span class="bol-v" style="color:#00ff88">A Mercado</span>
-                            </div>
-                        </div>
-                        
-                        <div class="motivo">Motivo: {ativo['Status']}</div>
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
+                st.markdown(html, unsafe_allow_html=True)
 
     st.markdown("---")
     with st.expander("🔍 Espião (Tabela Completa)"):
