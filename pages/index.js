@@ -2,8 +2,19 @@
 import { useState } from 'react';
 import Head from 'next/head';
 
-const CONFIG = { ativo_seguranca: 'B5P211.SA', peso_ouro: 0.50, peso_prata: 0.35, peso_bronze: 0.15 };
-const USUARIOS = { 'demo@tridente.com': { senha: 'demo123', nome: 'Usuário Demo' }, 'rafael@tridente.com': { senha: '123456', nome: 'Rafael' }, 'admin@tridente.com': { senha: 'admin123', nome: 'Admin' } };
+// ==============================================================================
+// 🔱 ROBÔ TRIDENTE V.32 | GUIA DE EXECUÇÃO DETALHADO (LOTE + FRACIONÁRIO)
+// ==============================================================================
+
+const CONFIG = {
+  ativoCaixa: 'B5P211.SA',
+};
+
+const USUARIOS = {
+  'demo@tridente.com': { senha: 'demo123', nome: 'Usuário Demo' },
+  'rafael@tridente.com': { senha: '123456', nome: 'Rafael' },
+  'admin@tridente.com': { senha: 'admin123', nome: 'Admin' }
+};
 
 export default function Home() {
   const [logado, setLogado] = useState(false);
@@ -14,11 +25,10 @@ export default function Home() {
   const [carregandoLogin, setCarregandoLogin] = useState(false);
   const [capital, setCapital] = useState('');
   const [capitalNum, setCapitalNum] = useState(0);
-  const [carteira, setCarteira] = useState([]);
+  const [dados, setDados] = useState(null);
   const [loading, setLoading] = useState(false);
   const [analiseFeita, setAnaliseFeita] = useState(false);
   const [erro, setErro] = useState('');
-  const [timestamp, setTimestamp] = useState('');
 
   const fazerLogin = async () => {
     setErroLogin(''); setCarregandoLogin(true);
@@ -29,105 +39,297 @@ export default function Home() {
     setCarregandoLogin(false);
   };
 
-  const fazerLogout = () => { setLogado(false); setNomeUsuario(''); setEmail(''); setSenha(''); setAnaliseFeita(false); setCapital(''); setCapitalNum(0); setCarteira([]); };
+  const fazerLogout = () => {
+    setLogado(false); setNomeUsuario(''); setEmail(''); setSenha('');
+    setAnaliseFeita(false); setCapital(''); setCapitalNum(0); setDados(null);
+  };
+
   const formatCurrency = (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
-  const handleCapitalChange = (e) => { let v = e.target.value.replace(/\D/g, ''); if (v) { const n = parseInt(v) / 100; setCapitalNum(n); setCapital(formatCurrency(n)); } else { setCapital(''); setCapitalNum(0); } };
+
+  const handleCapitalChange = (e) => {
+    let v = e.target.value.replace(/\D/g, '');
+    if (v) { const n = parseInt(v) / 100; setCapitalNum(n); setCapital(formatCurrency(n)); }
+    else { setCapital(''); setCapitalNum(0); }
+  };
 
   const executarAnalise = async () => {
     setLoading(true); setErro('');
     try {
       const response = await fetch('/api/dados');
       const resultado = await response.json();
-      if (resultado.success) { setCarteira(resultado.data); setTimestamp(resultado.timestamp); setAnaliseFeita(true); }
+      if (resultado.success) { setDados(resultado); setAnaliseFeita(true); }
       else { setErro('Erro: ' + resultado.error); }
     } catch (e) { setErro('Erro de conexão.'); }
     setLoading(false);
   };
 
-  const vendas = carteira.filter(a => a.Acao === 'VENDA');
-  const compras = carteira.filter(a => a.Acao === 'COMPRA');
-  let top3_tickers = [], top3_dados = [];
-  if (compras.length >= 3) { top3_dados = compras.slice(0, 3); top3_tickers = top3_dados.map(c => c.Ticker); }
-  else if (compras.length > 0) { top3_dados = compras; top3_tickers = compras.map(c => c.Ticker); }
+  const cores = {
+    fundo: '#0a0a0f', borda: '#1e3a5f', azul: '#00d4ff', verde: '#00ff88',
+    vermelho: '#ff3366', amarelo: '#ffcc00', laranja: '#ff8800', texto: '#e0e0e0',
+    textoSecundario: '#8892a0', dourado: '#ffd700', prata: '#c0c0c0', bronze: '#cd7f32',
+    roxo: '#a855f7', ciano: '#06b6d4'
+  };
 
-  let pesos = [], nomes = [];
-  if (top3_tickers.length === 3) { pesos = [0.50, 0.35, 0.15]; nomes = ["🥇 OURO (50%)", "🥈 PRATA (35%)", "🥉 BRONZE (15%)"]; }
-  else if (top3_tickers.length === 2) { pesos = [0.60, 0.40]; nomes = ["🥇 OURO (60%)", "🥈 PRATA (40%)"]; }
-  else if (top3_tickers.length === 1) { pesos = [1.0]; nomes = ["🥇 OURO (100%)"]; }
-
-  let sobraTotal = 0;
-  const planosCompra = top3_dados.map((ativo, i) => { const p_alvo = pesos[i] * capitalNum; const qtd = Math.floor(p_alvo / ativo.Preco); sobraTotal += p_alvo - (qtd * ativo.Preco); return { tickerClean: ativo.Ticker.replace('.SA', ''), nome: nomes[i], p_alvo, cotacao: ativo.Preco, qtd }; });
-
-  const cores = { fundo: '#0a0a0f', borda: '#1e3a5f', azul: '#00d4ff', verde: '#00ff88', vermelho: '#ff3366', amarelo: '#ffcc00', laranja: '#ff8800', texto: '#e0e0e0', textoSecundario: '#8892a0', dourado: '#ffd700', prata: '#c0c0c0', bronze: '#cd7f32', roxo: '#a855f7' };
-
+  // ============================================================================
+  // TELA DE LOGIN
+  // ============================================================================
   if (!logado) {
     return (
-      <><Head><title>Robô Tridente V.20.3</title><meta name="viewport" content="width=device-width, initial-scale=1" /></Head>
+      <><Head><title>Robô Tridente V.32</title><meta name="viewport" content="width=device-width, initial-scale=1" /></Head>
       <div style={{ minHeight: '100vh', background: `radial-gradient(ellipse at top, #0d1a2d 0%, ${cores.fundo} 50%, #050508 100%)`, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', fontFamily: "'Segoe UI', sans-serif" }}>
         <div style={{ width: '100%', maxWidth: '400px' }}>
-          <div style={{ textAlign: 'center', marginBottom: '40px' }}><div style={{ fontSize: '72px', marginBottom: '16px', filter: 'drop-shadow(0 0 30px rgba(0, 212, 255, 0.5))' }}>🔱</div><div style={{ fontSize: '28px', fontWeight: '800', color: cores.azul, letterSpacing: '3px' }}>ROBÔ TRIDENTE</div><div style={{ fontSize: '14px', color: cores.textoSecundario, letterSpacing: '4px', marginTop: '8px' }}>V.20.3 • DADOS AO VIVO</div></div>
+          <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+            <div style={{ fontSize: '72px', marginBottom: '16px', filter: 'drop-shadow(0 0 30px rgba(0, 212, 255, 0.5))' }}>🔱</div>
+            <div style={{ fontSize: '28px', fontWeight: '800', color: cores.azul, letterSpacing: '3px' }}>ROBÔ TRIDENTE</div>
+            <div style={{ fontSize: '14px', color: cores.textoSecundario, letterSpacing: '4px', marginTop: '8px' }}>V.32 • SEMANAL • DADOS AO VIVO</div>
+          </div>
           <div style={{ background: 'linear-gradient(145deg, rgba(13, 17, 23, 0.95), rgba(10, 10, 15, 0.98))', border: `1px solid ${cores.borda}`, borderRadius: '20px', padding: '40px 32px' }}>
             <div style={{ fontSize: '20px', fontWeight: '600', color: '#fff', marginBottom: '28px', textAlign: 'center' }}>👤 Acesso ao Sistema</div>
             <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} style={{ width: '100%', padding: '16px 20px', fontSize: '15px', background: 'rgba(0,0,0,0.4)', border: `1px solid ${cores.borda}`, borderRadius: '12px', color: cores.texto, marginBottom: '16px', boxSizing: 'border-box', outline: 'none' }} />
             <input type="password" placeholder="Senha" value={senha} onChange={(e) => setSenha(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && fazerLogin()} style={{ width: '100%', padding: '16px 20px', fontSize: '15px', background: 'rgba(0,0,0,0.4)', border: `1px solid ${cores.borda}`, borderRadius: '12px', color: cores.texto, marginBottom: '20px', boxSizing: 'border-box', outline: 'none' }} />
             {erroLogin && <div style={{ background: 'rgba(255, 51, 102, 0.15)', border: '1px solid rgba(255, 51, 102, 0.4)', borderRadius: '10px', padding: '14px', marginBottom: '20px', color: cores.vermelho, fontSize: '14px', textAlign: 'center' }}>❌ {erroLogin}</div>}
             <button onClick={fazerLogin} disabled={carregandoLogin || !email || !senha} style={{ width: '100%', padding: '16px', fontSize: '16px', fontWeight: '700', background: carregandoLogin ? cores.textoSecundario : `linear-gradient(135deg, ${cores.azul} 0%, #0080ff 100%)`, border: 'none', borderRadius: '12px', color: '#fff', cursor: carregandoLogin ? 'wait' : 'pointer' }}>{carregandoLogin ? '⏳ Autenticando...' : '🔱 ENTRAR'}</button>
-            <div style={{ marginTop: '28px', padding: '20px', background: 'rgba(0, 212, 255, 0.08)', border: '1px solid rgba(0, 212, 255, 0.2)', borderRadius: '12px', fontSize: '13px' }}><div style={{ color: cores.azul, fontWeight: '600', marginBottom: '10px' }}>🎮 Conta Demo:</div><div style={{ color: cores.textoSecundario }}>Email: <span style={{ color: cores.texto }}>demo@tridente.com</span></div><div style={{ color: cores.textoSecundario }}>Senha: <span style={{ color: cores.texto }}>demo123</span></div></div>
+            <div style={{ marginTop: '28px', padding: '20px', background: 'rgba(0, 212, 255, 0.08)', border: '1px solid rgba(0, 212, 255, 0.2)', borderRadius: '12px', fontSize: '13px' }}>
+              <div style={{ color: cores.azul, fontWeight: '600', marginBottom: '10px' }}>🎮 Conta Demo:</div>
+              <div style={{ color: cores.textoSecundario }}>Email: <span style={{ color: cores.texto }}>demo@tridente.com</span></div>
+              <div style={{ color: cores.textoSecundario }}>Senha: <span style={{ color: cores.texto }}>demo123</span></div>
+            </div>
           </div>
         </div>
       </div></>
     );
   }
 
+  // ============================================================================
+  // APP PRINCIPAL
+  // ============================================================================
   return (
-    <><Head><title>Robô Tridente V.20.3</title><meta name="viewport" content="width=device-width, initial-scale=1" /></Head>
+    <><Head><title>Robô Tridente V.32</title><meta name="viewport" content="width=device-width, initial-scale=1" /></Head>
     <div style={{ minHeight: '100vh', background: `radial-gradient(ellipse at top, #0d1a2d 0%, ${cores.fundo} 50%, #050508 100%)`, padding: '20px', fontFamily: "'Segoe UI', sans-serif", color: cores.texto }}>
-      <div style={{ textAlign: 'center', marginBottom: '28px' }}><div style={{ fontSize: '56px', filter: 'drop-shadow(0 0 25px rgba(0, 212, 255, 0.5))' }}>🔱</div><div style={{ fontSize: '26px', fontWeight: '800', color: cores.azul, letterSpacing: '2px' }}>ROBÔ TRIDENTE V.20.3</div><div style={{ fontSize: '12px', color: cores.verde, letterSpacing: '3px', marginTop: '4px' }}>📡 DADOS AO VIVO</div></div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0, 212, 255, 0.08)', border: '1px solid rgba(0, 212, 255, 0.2)', borderRadius: '12px', padding: '14px 20px', marginBottom: '24px' }}><div><span style={{ color: cores.verde, fontSize: '10px' }}>●</span><span style={{ marginLeft: '10px', fontSize: '14px' }}>Operador: <strong style={{ color: cores.azul }}>{nomeUsuario}</strong></span></div><button onClick={fazerLogout} style={{ background: 'rgba(255, 51, 102, 0.15)', border: '1px solid rgba(255, 51, 102, 0.4)', borderRadius: '8px', padding: '10px 18px', color: cores.vermelho, cursor: 'pointer', fontSize: '12px', fontWeight: '600' }}>🚪 Sair</button></div>
 
+      {/* HEADER */}
+      <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+        <div style={{ fontSize: '56px', filter: 'drop-shadow(0 0 25px rgba(0, 212, 255, 0.5))' }}>🔱</div>
+        <div style={{ fontSize: '26px', fontWeight: '800', color: cores.azul, letterSpacing: '2px' }}>ROBÔ TRIDENTE V.32</div>
+        <div style={{ fontSize: '12px', color: cores.verde, letterSpacing: '3px', marginTop: '4px' }}>📡 GRÁFICO SEMANAL • DADOS AO VIVO</div>
+      </div>
+
+      {/* BARRA USUÁRIO */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0, 212, 255, 0.08)', border: '1px solid rgba(0, 212, 255, 0.2)', borderRadius: '12px', padding: '14px 20px', marginBottom: '24px' }}>
+        <div><span style={{ color: cores.verde, fontSize: '10px' }}>●</span><span style={{ marginLeft: '10px', fontSize: '14px' }}>Operador: <strong style={{ color: cores.azul }}>{nomeUsuario}</strong></span></div>
+        <button onClick={fazerLogout} style={{ background: 'rgba(255, 51, 102, 0.15)', border: '1px solid rgba(255, 51, 102, 0.4)', borderRadius: '8px', padding: '10px 18px', color: cores.vermelho, cursor: 'pointer', fontSize: '12px', fontWeight: '600' }}>🚪 Sair</button>
+      </div>
+
+      {/* INPUT CAPITAL */}
       {!analiseFeita && (
         <div style={{ background: 'linear-gradient(145deg, rgba(13, 17, 23, 0.9), rgba(10, 10, 15, 0.95))', border: `1px solid ${cores.borda}`, borderRadius: '16px', padding: '28px', marginBottom: '24px' }}>
-          <div style={{ color: cores.azul, fontWeight: '700', marginBottom: '20px', fontSize: '16px' }}>📝 INSTRUÇÃO INICIAL</div>
-          <div style={{ lineHeight: '2', marginBottom: '24px', color: cores.texto, paddingLeft: '16px', borderLeft: `3px solid ${cores.borda}` }}>1. Abra o App/Site da sua corretora.<br/>2. Veja quanto dinheiro você tem no total.</div>
-          <div style={{ marginBottom: '12px', color: cores.texto }}>👉 Digite esse valor total (R$):</div>
+          <div style={{ background: `linear-gradient(90deg, ${cores.azul}22, transparent)`, borderLeft: `4px solid ${cores.azul}`, padding: '16px', marginBottom: '24px', borderRadius: '0 12px 12px 0' }}>
+            <div style={{ fontSize: '18px', fontWeight: '700', color: cores.azul, marginBottom: '12px' }}>📝 CHECKLIST INICIAL</div>
+            <div style={{ lineHeight: '2', color: cores.texto, fontSize: '15px' }}>
+              1. Abra o app da sua corretora.<br/>
+              2. Veja quanto você tem de <strong>SALDO LIVRE</strong> + Valor das Ações do Robô (se já tiver).<br/>
+              3. Vamos calcular exatamente o que comprar (Lote Padrão vs Fracionário).
+            </div>
+          </div>
+          <div style={{ marginBottom: '12px', color: cores.texto, fontSize: '16px' }}>👉 Digite seu <strong>PATRIMÔNIO TOTAL</strong> para a estratégia (R$):</div>
           <input type="text" value={capital} onChange={handleCapitalChange} placeholder="R$ 0,00" style={{ width: '100%', padding: '18px', fontSize: '26px', textAlign: 'center', fontWeight: '700', fontFamily: 'monospace', background: 'rgba(0, 212, 255, 0.05)', border: `2px solid ${cores.azul}`, borderRadius: '14px', color: cores.azul, marginBottom: '20px', boxSizing: 'border-box', outline: 'none' }} />
           {erro && <div style={{ background: 'rgba(255, 51, 102, 0.15)', border: '1px solid rgba(255, 51, 102, 0.4)', borderRadius: '10px', padding: '14px', marginBottom: '20px', color: cores.vermelho, textAlign: 'center' }}>❌ {erro}</div>}
-          <button onClick={executarAnalise} disabled={capitalNum <= 0 || loading} style={{ width: '100%', padding: '18px', fontSize: '16px', fontWeight: '700', background: capitalNum > 0 && !loading ? `linear-gradient(135deg, ${cores.azul} 0%, #0080ff 100%)` : '#2a2a3a', border: 'none', borderRadius: '12px', color: '#fff', cursor: capitalNum > 0 && !loading ? 'pointer' : 'not-allowed' }}>{loading ? '📡 Buscando dados ao vivo...' : '🔱 EXECUTAR ANÁLISE'}</button>
+          <button onClick={executarAnalise} disabled={capitalNum <= 0 || loading} style={{ width: '100%', padding: '18px', fontSize: '16px', fontWeight: '700', background: capitalNum > 0 && !loading ? `linear-gradient(135deg, ${cores.azul} 0%, #0080ff 100%)` : '#2a2a3a', border: 'none', borderRadius: '12px', color: '#fff', cursor: capitalNum > 0 && !loading ? 'pointer' : 'not-allowed' }}>
+            {loading ? '📡 Analisando gráficos SEMANAIS de 26 ativos...' : '🔱 EXECUTAR ANÁLISE'}
+          </button>
         </div>
       )}
 
-      {analiseFeita && (<>
-        <div style={{ background: 'linear-gradient(145deg, rgba(13, 17, 23, 0.9), rgba(10, 10, 15, 0.95))', border: `1px solid ${cores.borda}`, borderRadius: '16px', padding: '24px', marginBottom: '24px', overflowX: 'auto' }}>
-          <div style={{ color: cores.azul, fontWeight: '700', marginBottom: '20px', fontSize: '16px', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}><span>📊 MONITOR TRIDENTE</span><span style={{ color: cores.verde, fontSize: '12px' }}>🟢 {timestamp}</span></div>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px', fontFamily: 'monospace' }}>
-            <thead><tr style={{ borderBottom: `2px solid ${cores.borda}` }}><th style={{ padding: '10px 4px', textAlign: 'left', color: cores.textoSecundario }}>#</th><th style={{ padding: '10px 4px', textAlign: 'left', color: cores.textoSecundario }}>ATIVO</th><th style={{ padding: '10px 4px', textAlign: 'right', color: cores.textoSecundario }}>FORÇA</th><th style={{ padding: '10px 4px', textAlign: 'center', color: cores.textoSecundario }}>RSI</th><th style={{ padding: '10px 4px', textAlign: 'center', color: cores.textoSecundario }}>SINAL</th><th style={{ padding: '10px 4px', textAlign: 'right', color: cores.textoSecundario }}>PREÇO</th></tr></thead>
-            <tbody>{carteira.map((row, i) => { let sinal = '⚪', corSinal = cores.textoSecundario, bgRow = 'transparent'; if (top3_tickers.includes(row.Ticker)) { const idx = top3_tickers.indexOf(row.Ticker); if (idx === 0) { sinal = '🥇 OURO'; corSinal = cores.dourado; bgRow = 'rgba(255, 215, 0, 0.08)'; } else if (idx === 1) { sinal = '🥈 PRATA'; corSinal = cores.prata; bgRow = 'rgba(192, 192, 192, 0.08)'; } else { sinal = '🥉 BRONZE'; corSinal = cores.bronze; bgRow = 'rgba(205, 127, 50, 0.08)'; } } else if (row.Acao === 'COMPRA') { sinal = '🟢 Banco'; corSinal = cores.verde; } else if (row.Acao === 'VENDA') { sinal = '🔴 VENDA'; corSinal = cores.vermelho; } else { sinal = '🟡 Aguarde'; corSinal = cores.amarelo; } return (<tr key={i} style={{ background: bgRow, borderBottom: `1px solid ${cores.borda}` }}><td style={{ padding: '10px 4px', fontWeight: '600' }}>#{i + 1}</td><td style={{ padding: '10px 4px', fontWeight: '700' }}>{row.Ticker.replace('.SA', '')}</td><td style={{ padding: '10px 4px', textAlign: 'right', color: row.ROC > 0 ? cores.verde : cores.vermelho, fontWeight: '600' }}>{row.ROC > 0 ? '+' : ''}{row.ROC.toFixed(1)}%</td><td style={{ padding: '10px 4px', textAlign: 'center' }}>{Math.round(row.RSI)}</td><td style={{ padding: '10px 4px', textAlign: 'center', color: corSinal, fontWeight: '600', fontSize: '10px' }}>{sinal}</td><td style={{ padding: '10px 4px', textAlign: 'right' }}>R$ {row.Preco.toFixed(2)}</td></tr>); })}</tbody>
-          </table>
-        </div>
+      {/* RESULTADO */}
+      {analiseFeita && dados && (
+        <>
+          {/* TÍTULO DO GUIA */}
+          <div style={{ background: `linear-gradient(135deg, ${cores.azul}22, ${cores.roxo}11)`, border: `2px solid ${cores.azul}`, borderRadius: '14px', padding: '24px', marginBottom: '24px', textAlign: 'center' }}>
+            <div style={{ fontSize: '22px', fontWeight: '800', color: cores.azul, letterSpacing: '1px' }}>📘 GUIA DE OPERAÇÃO PARA INICIANTES</div>
+            <div style={{ fontSize: '14px', color: cores.textoSecundario, marginTop: '8px' }}>{dados.timestamp} • {dados.config?.totalAtivos || 26} ativos analisados</div>
+          </div>
 
-        <div style={{ background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(0, 128, 255, 0.05) 100%)', border: `2px solid ${cores.azul}`, borderRadius: '14px', padding: '24px', marginBottom: '24px', textAlign: 'center' }}><div style={{ fontSize: '20px', fontWeight: '800', color: cores.azul }}>📘 MANUAL DE EXECUÇÃO</div></div>
+          {/* ================================================================ */}
+          {/* PASSO 1: VENDAS */}
+          {/* ================================================================ */}
+          <div style={{ background: 'linear-gradient(145deg, rgba(13, 17, 23, 0.9), rgba(10, 10, 15, 0.95))', border: `1px solid ${cores.borda}`, borderRadius: '16px', padding: '24px', marginBottom: '24px' }}>
+            <div style={{ background: `linear-gradient(90deg, ${cores.laranja}22, transparent)`, borderLeft: `4px solid ${cores.laranja}`, padding: '16px', marginBottom: '20px', borderRadius: '0 12px 12px 0' }}>
+              <div style={{ fontSize: '18px', fontWeight: '700', color: cores.laranja }}>1️⃣ PASSO 1: FAZER CAIXA (VENDER)</div>
+            </div>
 
-        <div style={{ background: 'linear-gradient(145deg, rgba(13, 17, 23, 0.9), rgba(10, 10, 15, 0.95))', border: `1px solid ${cores.borda}`, borderRadius: '16px', padding: '24px', marginBottom: '24px' }}>
-          <div style={{ color: cores.laranja, fontWeight: '700', marginBottom: '16px', fontSize: '16px' }}>1️⃣ FASE 1: LIMPEZA (VENDAS)</div>
-          {vendas.length > 0 ? (<><div style={{ background: 'rgba(255, 136, 0, 0.1)', border: '1px solid rgba(255, 136, 0, 0.3)', borderRadius: '12px', padding: '20px', marginBottom: '16px' }}><div style={{ color: cores.laranja, fontWeight: '600', marginBottom: '12px' }}>⚠️ LISTA DE VENDAS:</div>{vendas.map((a, i) => <div key={i} style={{ color: cores.vermelho, padding: '8px 0', paddingLeft: '16px' }}>🔴 <strong>{a.Ticker.replace('.SA', '')}</strong> ({a.Status})</div>)}</div></>) : (<div style={{ background: 'rgba(0, 255, 136, 0.1)', border: '1px solid rgba(0, 255, 136, 0.3)', borderRadius: '12px', padding: '20px', color: cores.verde }}>✅ Nenhuma venda necessária.</div>)}
-        </div>
+            {dados.vendas && dados.vendas.length > 0 ? (
+              <>
+                <div style={{ color: cores.texto, marginBottom: '16px', fontSize: '15px', lineHeight: '1.8' }}>
+                  Verifique sua carteira atual. Se você tiver algum destes ativos, <strong style={{ color: cores.vermelho }}>VENDA TUDO</strong>.<br/>
+                  <span style={{ color: cores.textoSecundario }}>(Use a opção "Venda a Mercado" no seu Home Broker)</span>
+                </div>
+                <div style={{ background: 'rgba(255, 51, 102, 0.1)', border: '1px solid rgba(255, 51, 102, 0.3)', borderRadius: '12px', padding: '20px', marginBottom: '16px' }}>
+                  {dados.vendas.map((v, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', padding: '12px 0', borderBottom: i < dados.vendas.length - 1 ? '1px solid rgba(255,255,255,0.1)' : 'none' }}>
+                      <span style={{ fontSize: '20px', marginRight: '12px' }}>❌</span>
+                      <span style={{ color: cores.vermelho, fontWeight: '700', fontSize: '16px', marginRight: '12px' }}>{v.Ticker.replace('.SA', '')}</span>
+                      <span style={{ color: cores.textoSecundario }}>→ Motivo: {v.Status}</span>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ background: 'rgba(0, 255, 136, 0.1)', borderRadius: '10px', padding: '14px', color: cores.verde }}>
+                  💵 O dinheiro dessas vendas será usado no Passo 2.
+                </div>
+              </>
+            ) : (
+              <div style={{ background: 'rgba(0, 255, 136, 0.1)', border: '1px solid rgba(0, 255, 136, 0.3)', borderRadius: '12px', padding: '20px' }}>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <span style={{ fontSize: '24px', marginRight: '12px' }}>✅</span>
+                  <span style={{ color: cores.verde, fontSize: '16px' }}>Nenhuma venda necessária. Seus ativos atuais continuam bons.</span>
+                </div>
+              </div>
+            )}
+          </div>
 
-        <div style={{ background: 'linear-gradient(145deg, rgba(13, 17, 23, 0.9), rgba(10, 10, 15, 0.95))', border: `1px solid ${cores.borda}`, borderRadius: '16px', padding: '24px', marginBottom: '24px' }}>
-          <div style={{ color: cores.verde, fontWeight: '700', marginBottom: '16px', fontSize: '16px' }}>2️⃣ FASE 2: COMPRAS</div>
-          {top3_tickers.length > 0 ? (<>{planosCompra.map((plano, i) => { let corBorda = cores.dourado, bgCard = 'rgba(255, 215, 0, 0.08)'; if (i === 1) { corBorda = cores.prata; bgCard = 'rgba(192, 192, 192, 0.08)'; } if (i === 2) { corBorda = cores.bronze; bgCard = 'rgba(205, 127, 50, 0.08)'; } return (<div key={i} style={{ background: bgCard, border: `2px solid ${corBorda}`, borderRadius: '14px', padding: '20px', marginBottom: '16px' }}><div style={{ fontSize: '16px', fontWeight: '700', color: corBorda, marginBottom: '16px' }}>{plano.nome}: [{plano.tickerClean}]</div><div style={{ marginBottom: '16px', fontFamily: 'monospace' }}><div>💰 Valor: <strong style={{ color: cores.verde }}>{formatCurrency(plano.p_alvo)}</strong></div><div>📦 Qtd: <strong style={{ color: cores.azul }}>{plano.qtd} ações</strong></div></div><div style={{ background: 'rgba(0, 212, 255, 0.05)', border: '1px solid rgba(0, 212, 255, 0.2)', borderRadius: '10px', padding: '16px' }}><div style={{ color: cores.azul, fontWeight: '600', marginBottom: '10px' }}>👩‍💻 HOME BROKER:</div><div style={{ lineHeight: '2', fontSize: '14px' }}>1. Código: <strong>{plano.tickerClean}</strong> ou <strong>{plano.tickerClean}F</strong><br/>2. <strong>COMPRAR</strong> → Qtd: <strong>{plano.qtd}</strong> → <strong>A MERCADO</strong></div></div></div>); })}{sobraTotal > 50 && (<div style={{ background: 'rgba(0, 255, 136, 0.1)', border: '1px solid rgba(0, 255, 136, 0.3)', borderRadius: '12px', padding: '16px' }}><div style={{ color: cores.verde, fontWeight: '600' }}>💰 SOBRA: {formatCurrency(sobraTotal)}</div></div>)}</>) : (<div style={{ background: 'rgba(255, 51, 102, 0.1)', border: '1px solid rgba(255, 51, 102, 0.3)', borderRadius: '14px', textAlign: 'center', padding: '40px' }}><div style={{ fontSize: '48px', marginBottom: '16px' }}>🛑</div><div style={{ fontSize: '20px', fontWeight: '700', color: cores.vermelho }}>MODO DEFESA</div><div style={{ color: cores.dourado, marginTop: '12px' }}>👉 Coloque tudo no B5P211</div></div>)}
-        </div>
+          {/* ================================================================ */}
+          {/* PASSO 2: COMPRAS */}
+          {/* ================================================================ */}
+          <div style={{ background: 'linear-gradient(145deg, rgba(13, 17, 23, 0.9), rgba(10, 10, 15, 0.95))', border: `1px solid ${cores.borda}`, borderRadius: '16px', padding: '24px', marginBottom: '24px' }}>
+            <div style={{ background: `linear-gradient(90deg, ${cores.verde}22, transparent)`, borderLeft: `4px solid ${cores.verde}`, padding: '16px', marginBottom: '20px', borderRadius: '0 12px 12px 0' }}>
+              <div style={{ fontSize: '18px', fontWeight: '700', color: cores.verde }}>2️⃣ PASSO 2: COMPRAR NOVOS ATIVOS</div>
+            </div>
 
-        <div style={{ background: 'linear-gradient(145deg, rgba(13, 17, 23, 0.9), rgba(10, 10, 15, 0.95))', border: `1px solid ${cores.borda}`, borderRadius: '16px', padding: '24px', marginBottom: '24px' }}>
-          <div style={{ color: cores.roxo, fontWeight: '700', marginBottom: '16px', fontSize: '16px' }}>3️⃣ FASE 3: CHECKOUT</div>
-          <div style={{ lineHeight: '2.5' }}>{['Vendeu o que estava vermelho?', 'Comprou Ouro, Prata e Bronze?', 'Sobrou pouco dinheiro? (Normal)'].map((t, i) => (<label key={i} style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}><input type="checkbox" style={{ width: '20px', height: '20px', marginRight: '14px', accentColor: cores.verde }} />{t}</label>))}</div>
-        </div>
+            <div style={{ color: cores.texto, marginBottom: '20px', fontSize: '15px' }}>
+              Vamos distribuir seus <strong style={{ color: cores.azul }}>{formatCurrency(capitalNum)}</strong> igualmente nos 3 melhores ativos.
+            </div>
 
-        <div style={{ textAlign: 'center', background: 'linear-gradient(135deg, rgba(0, 255, 136, 0.1) 0%, rgba(0, 200, 100, 0.05) 100%)', border: '2px solid rgba(0, 255, 136, 0.3)', borderRadius: '16px', padding: '40px 24px', marginBottom: '24px' }}><div style={{ fontSize: '56px', marginBottom: '16px' }}>🚀</div><div style={{ fontSize: '22px', fontWeight: '800', color: cores.verde }}>TUDO PRONTO</div><div style={{ color: cores.texto, fontSize: '15px', marginTop: '12px' }}>FECHE O HOME BROKER E SÓ VOLTE NA PRÓXIMA SEGUNDA.</div></div>
+            {dados.carteiraFinal && dados.carteiraFinal.length > 0 ? (
+              <>
+                {dados.carteiraFinal.map((ativo, i) => {
+                  const peso = 1.0 / dados.carteiraFinal.length;
+                  const alocacao = capitalNum * peso;
+                  const qtdTotal = Math.floor(alocacao / ativo.Preco);
+                  const lotesPadrao = Math.floor(qtdTotal / 100);
+                  const qtdPadrao = lotesPadrao * 100;
+                  const qtdFrac = qtdTotal % 100;
+                  const tickerLimpo = ativo.Ticker.replace('.SA', '');
+                  const isAtaque = ativo.Tipo === 'ATAQUE';
+                  const tipoEmoji = isAtaque ? '⚔️ ATAQUE' : '🛡️ DEFESA';
+                  const corCard = i === 0 ? cores.dourado : i === 1 ? cores.prata : cores.bronze;
+                  const bgCard = i === 0 ? 'rgba(255, 215, 0, 0.08)' : i === 1 ? 'rgba(192, 192, 192, 0.08)' : 'rgba(205, 127, 50, 0.08)';
 
-        <button onClick={() => { setAnaliseFeita(false); setCapital(''); setCapitalNum(0); setCarteira([]); }} style={{ width: '100%', padding: '16px', background: 'rgba(255, 255, 255, 0.05)', border: `1px solid ${cores.borda}`, borderRadius: '12px', color: cores.texto, cursor: 'pointer', fontSize: '15px', fontWeight: '600' }}>🔄 Nova Análise</button>
-      </>)}
+                  return (
+                    <div key={i} style={{ background: bgCard, border: `2px solid ${corCard}`, borderRadius: '14px', padding: '24px', marginBottom: '20px' }}>
+                      {/* HEADER DO ATIVO */}
+                      <div style={{ background: 'rgba(0,0,0,0.3)', borderRadius: '10px', padding: '16px', marginBottom: '20px', borderLeft: `4px solid ${corCard}` }}>
+                        <div style={{ fontSize: '18px', fontWeight: '800', color: corCard, marginBottom: '4px' }}>
+                          🏆 RANK #{i + 1}: {ativo.Ticker.replace('.SA', '')} ({tipoEmoji})
+                        </div>
+                      </div>
 
-      <div style={{ textAlign: 'center', padding: '24px', fontSize: '11px', color: '#3a3a4a', marginTop: '20px' }}>⚖️ Ferramenta educacional (CVM 598/2018)</div>
+                      {/* INFO DO ATIVO */}
+                      <div style={{ display: 'grid', gap: '12px', marginBottom: '20px', fontFamily: 'monospace', fontSize: '15px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                          <span style={{ marginRight: '10px' }}>💰</span>
+                          <span>Valor para investir: <strong style={{ color: cores.verde }}>{formatCurrency(alocacao)}</strong></span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                          <span style={{ marginRight: '10px' }}>📊</span>
+                          <span>Preço Atual: <strong style={{ color: cores.azul }}>R$ {ativo.Preco.toFixed(2)}</strong></span>
+                        </div>
+                      </div>
+
+                      {/* INSTRUÇÕES DA BOLETA */}
+                      <div style={{ background: 'rgba(0, 212, 255, 0.08)', border: '1px solid rgba(0, 212, 255, 0.3)', borderRadius: '12px', padding: '20px' }}>
+                        <div style={{ color: cores.azul, fontWeight: '700', fontSize: '16px', marginBottom: '16px', display: 'flex', alignItems: 'center' }}>
+                          <span style={{ marginRight: '10px' }}>📝</span>
+                          COMO PREENCHER A ORDEM (BOLETA):
+                        </div>
+
+                        {qtdTotal > 0 ? (
+                          <div style={{ display: 'grid', gap: '16px' }}>
+                            {/* LOTE PADRÃO */}
+                            {qtdPadrao > 0 && (
+                              <div style={{ background: 'rgba(0,0,0,0.2)', borderRadius: '10px', padding: '16px', borderLeft: `3px solid ${cores.verde}` }}>
+                                <div style={{ color: cores.verde, fontWeight: '600', marginBottom: '12px' }}>[1] LOTE PADRÃO</div>
+                                <div style={{ lineHeight: '2.2', fontSize: '15px' }}>
+                                  <div>Digite o código: <strong style={{ color: '#fff', background: 'rgba(255,255,255,0.1)', padding: '2px 8px', borderRadius: '4px' }}>{tickerLimpo}</strong></div>
+                                  <div>Quantidade: <strong style={{ color: cores.azul }}>{qtdPadrao}</strong></div>
+                                  <div>Preço: <strong style={{ color: cores.amarelo }}>A Mercado</strong> (Melhor oferta)</div>
+                                  <div style={{ marginTop: '8px', color: cores.verde, fontWeight: '700' }}>👉 CLIQUE EM COMPRAR</div>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* FRACIONÁRIO */}
+                            {qtdFrac > 0 && (
+                              <div style={{ background: 'rgba(0,0,0,0.2)', borderRadius: '10px', padding: '16px', borderLeft: `3px solid ${cores.ciano}` }}>
+                                <div style={{ color: cores.ciano, fontWeight: '600', marginBottom: '12px' }}>[{qtdPadrao > 0 ? '2' : '1'}] FRACIONÁRIO</div>
+                                <div style={{ lineHeight: '2.2', fontSize: '15px' }}>
+                                  <div>{qtdPadrao > 0 ? 'Também digite' : 'Digite'} o código: <strong style={{ color: '#fff', background: 'rgba(255,255,255,0.1)', padding: '2px 8px', borderRadius: '4px' }}>{tickerLimpo}F</strong> <span style={{ color: cores.textoSecundario }}>(Com o 'F' no final)</span></div>
+                                  <div>Quantidade: <strong style={{ color: cores.azul }}>{qtdFrac}</strong></div>
+                                  <div>Preço: <strong style={{ color: cores.amarelo }}>A Mercado</strong></div>
+                                  <div style={{ marginTop: '8px', color: cores.verde, fontWeight: '700' }}>👉 CLIQUE EM COMPRAR</div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div style={{ color: cores.amarelo, padding: '12px', background: 'rgba(255, 204, 0, 0.1)', borderRadius: '8px' }}>
+                            ⚠️ Saldo insuficiente para comprar 1 ação deste ativo.
+                          </div>
+                        )}
+
+                        {/* MOTIVO */}
+                        <div style={{ marginTop: '16px', padding: '12px', background: 'rgba(168, 85, 247, 0.1)', borderRadius: '8px', color: cores.roxo, fontSize: '14px' }}>
+                          (Motivo da escolha: <strong>{ativo.Status}</strong>)
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {/* AVISO SE NÃO COMPLETOU 3 */}
+                {dados.carteiraFinal.length < 3 && (
+                  <div style={{ background: 'rgba(255, 204, 0, 0.1)', border: '1px solid rgba(255, 204, 0, 0.3)', borderRadius: '12px', padding: '20px', marginTop: '16px' }}>
+                    <div style={{ color: cores.amarelo, fontWeight: '600', marginBottom: '8px' }}>⚠️ NOTA: O mercado está difícil, não achamos 3 ativos bons.</div>
+                    <div style={{ color: cores.texto }}>
+                      👉 O dinheiro restante (<strong>{formatCurrency(capitalNum * ((3 - dados.carteiraFinal.length) / 3))}</strong>) deve ficar no <strong>CAIXA ({CONFIG.ativoCaixa.replace('.SA', '')})</strong> ou Tesouro Selic.
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              /* MODO DEFESA TOTAL */
+              <div style={{ background: 'rgba(255, 51, 102, 0.1)', border: '2px solid rgba(255, 51, 102, 0.4)', borderRadius: '14px', textAlign: 'center', padding: '40px' }}>
+                <div style={{ fontSize: '56px', marginBottom: '16px' }}>🛑</div>
+                <div style={{ fontSize: '22px', fontWeight: '800', color: cores.vermelho, marginBottom: '12px' }}>PARE TUDO</div>
+                <div style={{ color: cores.texto, fontSize: '16px', marginBottom: '16px', lineHeight: '1.8' }}>
+                  O mercado está muito perigoso hoje.<br/>
+                  Nenhuma compra é segura.
+                </div>
+                <div style={{ background: 'rgba(255, 215, 0, 0.15)', borderRadius: '10px', padding: '16px', color: cores.dourado, fontWeight: '600' }}>
+                  👉 AÇÃO: Deixe 100% do dinheiro parado no <strong>{CONFIG.ativoCaixa.replace('.SA', '')}</strong> ou Tesouro Selic.
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* ================================================================ */}
+          {/* FINALIZAÇÃO */}
+          {/* ================================================================ */}
+          <div style={{ textAlign: 'center', background: 'linear-gradient(135deg, rgba(0, 255, 136, 0.1) 0%, rgba(0, 200, 100, 0.05) 100%)', border: '2px solid rgba(0, 255, 136, 0.3)', borderRadius: '16px', padding: '40px 24px', marginBottom: '24px' }}>
+            <div style={{ fontSize: '56px', marginBottom: '16px' }}>🚀</div>
+            <div style={{ fontSize: '22px', fontWeight: '800', color: cores.verde, marginBottom: '12px' }}>OPERAÇÃO CONCLUÍDA</div>
+            <div style={{ color: cores.texto, fontSize: '16px' }}>FECHE O APP E SÓ VOLTE <strong>MÊS QUE VEM!</strong></div>
+          </div>
+
+          {/* BOTÃO NOVA ANÁLISE */}
+          <button onClick={() => { setAnaliseFeita(false); setCapital(''); setCapitalNum(0); setDados(null); }} style={{ width: '100%', padding: '16px', background: 'rgba(255, 255, 255, 0.05)', border: `1px solid ${cores.borda}`, borderRadius: '12px', color: cores.texto, cursor: 'pointer', fontSize: '15px', fontWeight: '600' }}>
+            🔄 Nova Análise
+          </button>
+        </>
+      )}
+
+      {/* FOOTER */}
+      <div style={{ textAlign: 'center', padding: '24px', fontSize: '11px', color: '#3a3a4a', marginTop: '20px' }}>
+        ⚖️ Ferramenta educacional (CVM 598/2018)
+      </div>
     </div></>
   );
 }
