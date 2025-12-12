@@ -1,0 +1,7 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { font-family: 'Segoe UI', -apple-system, sans-serif; background: #0a0a0f; color: #e0e0e0; }
+input:focus { outline: none; border-color: #00d4ff !important; }
+button:hover { opacity: 0.9; }
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #111; }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
