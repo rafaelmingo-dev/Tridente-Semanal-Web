@@ -1,6 +1,8 @@
 // ==============================================================================
-// 🔱 ROBÔ TRIDENTE V.32 | API DE LOGIN COM SUPABASE
+// 🔱 TRIDENTE V.32 | API DE LOGIN COM HASH DE SENHA
 // ==============================================================================
+
+import bcrypt from 'bcryptjs';
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_KEY;
@@ -18,9 +20,11 @@ export default async function handler(req, res) {
   }
 
   try {
+    const emailNormalizado = email.toLowerCase().trim();
+
     // Busca usuário no Supabase
     const response = await fetch(
-      `${SUPABASE_URL}/rest/v1/users?email=eq.${encodeURIComponent(email.toLowerCase().trim())}&select=*`,
+      `${SUPABASE_URL}/rest/v1/users?email=eq.${encodeURIComponent(emailNormalizado)}&select=*`,
       {
         headers: {
           'apikey': SUPABASE_KEY,
@@ -42,8 +46,36 @@ export default async function handler(req, res) {
 
     const user = users[0];
 
-    // Verifica senha
-    if (user.senha !== senha) {
+    // Verifica senha usando bcrypt
+    // Suporta tanto senhas com hash quanto senhas antigas em texto puro (para migração)
+    let senhaValida = false;
+    
+    if (user.senha.startsWith('$2a$') || user.senha.startsWith('$2b$')) {
+      // Senha já está com hash bcrypt
+      senhaValida = await bcrypt.compare(senha, user.senha);
+    } else {
+      // Senha antiga em texto puro - fazer migração
+      if (user.senha === senha) {
+        senhaValida = true;
+        
+        // Atualizar senha para hash (migração automática)
+        const senhaHash = await bcrypt.hash(senha, 10);
+        await fetch(
+          `${SUPABASE_URL}/rest/v1/users?id=eq.${user.id}`,
+          {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'apikey': SUPABASE_KEY,
+              'Authorization': `Bearer ${SUPABASE_KEY}`
+            },
+            body: JSON.stringify({ senha: senhaHash })
+          }
+        );
+      }
+    }
+
+    if (!senhaValida) {
       return res.status(401).json({ success: false, error: 'Senha incorreta' });
     }
 
