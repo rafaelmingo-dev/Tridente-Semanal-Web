@@ -1,5 +1,5 @@
 // ==============================================================================
-// 🔱 ROBÔ TRIDENTE V.32 | API COM SUPABASE
+// 🔱 TRIDENTE V.32 | API COM SUPABASE
 // ==============================================================================
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
@@ -236,8 +236,15 @@ export default async function handler(req, res) {
 
     todosAtivos.sort((a, b) => b.Score - a.Score);
 
-    const now = new Date();
-    const timestamp = now.toLocaleDateString('pt-BR') + ' ' + now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    // TIMESTAMP NO HORÁRIO DE BRASÍLIA
+    const timestamp = new Date().toLocaleString('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
 
     const resultado = {
       success: true,
