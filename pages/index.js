@@ -1,5 +1,5 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Head from 'next/head';
 
 // ==============================================================================
@@ -66,6 +66,30 @@ export default function Home() {
   const [analiseFeita, setAnaliseFeita] = useState(false);
   const [erro, setErro] = useState('');
 
+  // Estados do pagamento
+  const [processandoPagamento, setProcessandoPagamento] = useState(false);
+  const [mensagemPagamento, setMensagemPagamento] = useState('');
+
+  // Verificar parâmetros de URL após pagamento
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const pagamento = params.get('pagamento');
+      
+      if (pagamento === 'sucesso') {
+        setMensagemPagamento('✅ Pagamento aprovado! Seu plano PREMIUM foi ativado. Faça login novamente para acessar.');
+        // Limpar URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } else if (pagamento === 'falha') {
+        setMensagemPagamento('❌ Pagamento não aprovado. Tente novamente.');
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } else if (pagamento === 'pendente') {
+        setMensagemPagamento('⏳ Pagamento pendente. Assim que for confirmado, seu plano será ativado.');
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+  }, []);
+
   // LOGIN COM SUPABASE
   const fazerLogin = async () => {
     setErroLogin('');
@@ -83,6 +107,7 @@ export default function Home() {
       if (result.success) {
         setUsuario(result.user);
         setLogado(true);
+        setMensagemPagamento('');
       } else {
         setErroLogin(result.error || 'Email ou senha incorretos');
       }
@@ -134,6 +159,37 @@ export default function Home() {
     }
     
     setCarregandoCadastro(false);
+  };
+
+  // FAZER UPGRADE - REDIRECIONAR PARA MERCADO PAGO
+  const fazerUpgrade = async (plano) => {
+    setProcessandoPagamento(true);
+    
+    try {
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: usuario.id,
+          userEmail: usuario.email,
+          userName: usuario.nome,
+          plano: plano // 'mensal' ou 'anual'
+        })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success && result.checkoutUrl) {
+        // Redirecionar para o Mercado Pago
+        window.location.href = result.checkoutUrl;
+      } else {
+        alert('Erro ao processar pagamento: ' + (result.error || 'Tente novamente'));
+        setProcessandoPagamento(false);
+      }
+    } catch (e) {
+      alert('Erro de conexão. Tente novamente.');
+      setProcessandoPagamento(false);
+    }
   };
 
   const fazerLogout = () => {
@@ -204,6 +260,23 @@ export default function Home() {
             <div style={{ fontSize: '32px', fontWeight: '800', color: cores.azul, letterSpacing: '6px' }}>TRIDENTE</div>
             <div style={{ fontSize: '14px', color: cores.textoSecundario, letterSpacing: '4px', marginTop: '8px' }}>V.32 • PAINEL DE EXECUÇÃO</div>
           </div>
+
+          {/* MENSAGEM DE PAGAMENTO */}
+          {mensagemPagamento && (
+            <div style={{ 
+              background: mensagemPagamento.includes('✅') ? 'rgba(0, 255, 136, 0.15)' : mensagemPagamento.includes('❌') ? 'rgba(255, 51, 102, 0.15)' : 'rgba(255, 204, 0, 0.15)', 
+              border: `1px solid ${mensagemPagamento.includes('✅') ? 'rgba(0, 255, 136, 0.4)' : mensagemPagamento.includes('❌') ? 'rgba(255, 51, 102, 0.4)' : 'rgba(255, 204, 0, 0.4)'}`, 
+              borderRadius: '12px', 
+              padding: '16px', 
+              marginBottom: '20px', 
+              color: mensagemPagamento.includes('✅') ? cores.verde : mensagemPagamento.includes('❌') ? cores.vermelho : cores.amarelo, 
+              fontSize: '14px', 
+              textAlign: 'center' 
+            }}>
+              {mensagemPagamento}
+            </div>
+          )}
+
           <div style={{ background: 'linear-gradient(145deg, rgba(13, 17, 23, 0.95), rgba(10, 10, 15, 0.98))', border: `1px solid ${cores.borda}`, borderRadius: '20px', padding: '40px 32px' }}>
             <div style={{ fontSize: '20px', fontWeight: '600', color: '#fff', marginBottom: '28px', textAlign: 'center' }}>👤 Acesso ao Sistema</div>
             <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} style={{ width: '100%', padding: '16px 20px', fontSize: '15px', background: 'rgba(0,0,0,0.4)', border: `1px solid ${cores.borda}`, borderRadius: '12px', color: cores.texto, marginBottom: '16px', boxSizing: 'border-box', outline: 'none' }} />
@@ -482,21 +555,30 @@ export default function Home() {
 
       {/* BANNER UPGRADE - SÓ PARA FREE */}
       {!isPremium && !analiseFeita && (
-        <div style={{ background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 136, 0, 0.1) 100%)', border: '1px solid rgba(255, 215, 0, 0.3)', borderRadius: '12px', padding: '20px', marginBottom: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+        <div style={{ background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 136, 0, 0.1) 100%)', border: '1px solid rgba(255, 215, 0, 0.3)', borderRadius: '12px', padding: '20px', marginBottom: '24px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginBottom: '16px' }}>
             <span style={{ fontSize: '28px' }}>⭐</span>
             <div style={{ flex: 1, minWidth: '200px' }}>
               <div style={{ color: cores.dourado, fontWeight: '700', fontSize: '16px' }}>Faça upgrade para PREMIUM</div>
               <div style={{ color: cores.textoSecundario, fontSize: '13px' }}>Acesso completo a todos os 3 ativos + instruções detalhadas</div>
             </div>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ color: cores.verde, fontWeight: '800', fontSize: '20px' }}>R$ {CONFIG.precoMensal.toFixed(2).replace('.', ',')}<span style={{ fontSize: '12px', color: cores.textoSecundario }}>/mês</span></div>
-              <div style={{ color: cores.textoSecundario, fontSize: '11px' }}>ou R$ {CONFIG.precoAnual.toFixed(2).replace('.', ',')}/ano</div>
-            </div>
           </div>
-          <button style={{ width: '100%', padding: '14px', background: `linear-gradient(135deg, ${cores.dourado} 0%, ${cores.laranja} 100%)`, border: 'none', borderRadius: '10px', color: '#000', fontWeight: '700', fontSize: '14px', cursor: 'pointer' }}>
-            🚀 FAZER UPGRADE AGORA
-          </button>
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <button 
+              onClick={() => fazerUpgrade('mensal')}
+              disabled={processandoPagamento}
+              style={{ flex: 1, minWidth: '140px', padding: '14px', background: `linear-gradient(135deg, ${cores.verde} 0%, #00cc66 100%)`, border: 'none', borderRadius: '10px', color: '#000', fontWeight: '700', fontSize: '14px', cursor: processandoPagamento ? 'wait' : 'pointer' }}
+            >
+              {processandoPagamento ? '⏳ Aguarde...' : `R$ ${CONFIG.precoMensal.toFixed(2).replace('.', ',')}/mês`}
+            </button>
+            <button 
+              onClick={() => fazerUpgrade('anual')}
+              disabled={processandoPagamento}
+              style={{ flex: 1, minWidth: '140px', padding: '14px', background: `linear-gradient(135deg, ${cores.dourado} 0%, ${cores.laranja} 100%)`, border: 'none', borderRadius: '10px', color: '#000', fontWeight: '700', fontSize: '14px', cursor: processandoPagamento ? 'wait' : 'pointer' }}
+            >
+              {processandoPagamento ? '⏳ Aguarde...' : `R$ ${CONFIG.precoAnual.toFixed(2).replace('.', ',')}/ano`}
+            </button>
+          </div>
         </div>
       )}
 
@@ -667,8 +749,12 @@ export default function Home() {
                           <div style={{ fontSize: '40px', marginBottom: '12px' }}>🔒</div>
                           <div style={{ color: cores.dourado, fontWeight: '700', fontSize: '16px', marginBottom: '8px' }}>{rankLabel} - BLOQUEADO</div>
                           <div style={{ color: cores.textoSecundario, fontSize: '13px', marginBottom: '16px' }}>Disponível no plano PREMIUM</div>
-                          <button style={{ padding: '10px 20px', background: `linear-gradient(135deg, ${cores.dourado} 0%, ${cores.laranja} 100%)`, border: 'none', borderRadius: '8px', color: '#000', fontWeight: '700', fontSize: '13px', cursor: 'pointer' }}>
-                            ⭐ FAZER UPGRADE
+                          <button 
+                            onClick={() => fazerUpgrade('mensal')}
+                            disabled={processandoPagamento}
+                            style={{ padding: '10px 20px', background: `linear-gradient(135deg, ${cores.dourado} 0%, ${cores.laranja} 100%)`, border: 'none', borderRadius: '8px', color: '#000', fontWeight: '700', fontSize: '13px', cursor: processandoPagamento ? 'wait' : 'pointer' }}
+                          >
+                            {processandoPagamento ? '⏳' : '⭐ FAZER UPGRADE'}
                           </button>
                         </div>
                       </div>
@@ -794,18 +880,23 @@ export default function Home() {
                 Tenha acesso aos <strong>3 ativos selecionados</strong>, instruções detalhadas da boleta e muito mais!
               </div>
               <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', flexWrap: 'wrap', marginBottom: '20px' }}>
-                <div style={{ background: 'rgba(0,0,0,0.2)', borderRadius: '10px', padding: '16px 24px' }}>
+                <button 
+                  onClick={() => fazerUpgrade('mensal')}
+                  disabled={processandoPagamento}
+                  style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '16px 24px', cursor: processandoPagamento ? 'wait' : 'pointer' }}
+                >
                   <div style={{ color: cores.textoSecundario, fontSize: '12px' }}>MENSAL</div>
                   <div style={{ color: cores.verde, fontWeight: '800', fontSize: '24px' }}>R$ {CONFIG.precoMensal.toFixed(2).replace('.', ',')}</div>
-                </div>
-                <div style={{ background: 'rgba(255, 215, 0, 0.1)', borderRadius: '10px', padding: '16px 24px', border: '1px solid rgba(255, 215, 0, 0.3)' }}>
+                </button>
+                <button 
+                  onClick={() => fazerUpgrade('anual')}
+                  disabled={processandoPagamento}
+                  style={{ background: 'rgba(255, 215, 0, 0.1)', borderRadius: '10px', padding: '16px 24px', border: '1px solid rgba(255, 215, 0, 0.3)', cursor: processandoPagamento ? 'wait' : 'pointer' }}
+                >
                   <div style={{ color: cores.dourado, fontSize: '12px' }}>ANUAL <span style={{ background: cores.verde, color: '#000', padding: '2px 6px', borderRadius: '4px', fontSize: '10px', marginLeft: '6px' }}>-25%</span></div>
                   <div style={{ color: cores.verde, fontWeight: '800', fontSize: '24px' }}>R$ {CONFIG.precoAnual.toFixed(2).replace('.', ',')}</div>
-                </div>
+                </button>
               </div>
-              <button style={{ padding: '16px 40px', background: `linear-gradient(135deg, ${cores.dourado} 0%, ${cores.laranja} 100%)`, border: 'none', borderRadius: '12px', color: '#000', fontWeight: '700', fontSize: '16px', cursor: 'pointer' }}>
-                🚀 FAZER UPGRADE PARA PREMIUM
-              </button>
             </div>
           )}
 
