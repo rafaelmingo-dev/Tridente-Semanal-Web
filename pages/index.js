@@ -3,11 +3,13 @@ import { useState } from 'react';
 import Head from 'next/head';
 
 // ==============================================================================
-// 🔱 TRIDENTE V.32 | PAINEL DE EXECUÇÃO PROFISSIONAL
+// 🔱 TRIDENTE V.32 | PAINEL DE EXECUÇÃO PROFISSIONAL - SAAS
 // ==============================================================================
 
 const CONFIG = {
   ativoCaixa: 'B5P211.SA',
+  precoMensal: 19.90,
+  precoAnual: 179.90,
 };
 
 // Função para calcular a primeira segunda-feira útil do próximo mês
@@ -35,10 +37,22 @@ export default function Home() {
   // Estados de autenticação
   const [logado, setLogado] = useState(false);
   const [usuario, setUsuario] = useState(null);
+  const [telaAtual, setTelaAtual] = useState('login'); // 'login' ou 'cadastro'
+  
+  // Estados do formulário de login
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [erroLogin, setErroLogin] = useState('');
   const [carregandoLogin, setCarregandoLogin] = useState(false);
+  
+  // Estados do formulário de cadastro
+  const [cadastroNome, setCadastroNome] = useState('');
+  const [cadastroEmail, setCadastroEmail] = useState('');
+  const [cadastroSenha, setCadastroSenha] = useState('');
+  const [cadastroConfirmarSenha, setCadastroConfirmarSenha] = useState('');
+  const [erroCadastro, setErroCadastro] = useState('');
+  const [sucessoCadastro, setSucessoCadastro] = useState('');
+  const [carregandoCadastro, setCarregandoCadastro] = useState(false);
   
   // Estado da tela de disclaimer
   const [aceitouTermos, setAceitouTermos] = useState(false);
@@ -77,6 +91,49 @@ export default function Home() {
     }
     
     setCarregandoLogin(false);
+  };
+
+  // CADASTRO COM SUPABASE
+  const fazerCadastro = async () => {
+    setErroCadastro('');
+    setSucessoCadastro('');
+    setCarregandoCadastro(true);
+    
+    try {
+      const response = await fetch('/api/cadastro', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          nome: cadastroNome,
+          email: cadastroEmail, 
+          senha: cadastroSenha,
+          confirmarSenha: cadastroConfirmarSenha
+        })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        setSucessoCadastro('Conta criada com sucesso! Faça login para continuar.');
+        // Limpar formulário
+        setCadastroNome('');
+        setCadastroEmail('');
+        setCadastroSenha('');
+        setCadastroConfirmarSenha('');
+        // Voltar para login após 2 segundos
+        setTimeout(() => {
+          setTelaAtual('login');
+          setEmail(result.user.email);
+          setSucessoCadastro('');
+        }, 2000);
+      } else {
+        setErroCadastro(result.error || 'Erro ao criar conta');
+      }
+    } catch (e) {
+      setErroCadastro('Erro de conexão. Tente novamente.');
+    }
+    
+    setCarregandoCadastro(false);
   };
 
   const fazerLogout = () => {
@@ -124,6 +181,9 @@ export default function Home() {
     setLoading(false);
   };
 
+  // Verificar se usuário é premium
+  const isPremium = usuario?.plano === 'premium';
+
   const cores = {
     fundo: '#0a0a0f', borda: '#1e3a5f', azul: '#00d4ff', verde: '#00ff88',
     vermelho: '#ff3366', amarelo: '#ffcc00', laranja: '#ff8800', texto: '#e0e0e0',
@@ -132,9 +192,9 @@ export default function Home() {
   };
 
   // ============================================================================
-  // TELA 1: LOGIN
+  // TELA 1A: LOGIN
   // ============================================================================
-  if (!logado) {
+  if (!logado && telaAtual === 'login') {
     return (
       <><Head><title>Tridente V.32</title><meta name="viewport" content="width=device-width, initial-scale=1" /></Head>
       <div style={{ minHeight: '100vh', background: `radial-gradient(ellipse at top, #0d1a2d 0%, ${cores.fundo} 50%, #050508 100%)`, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', fontFamily: "'Segoe UI', sans-serif" }}>
@@ -150,10 +210,81 @@ export default function Home() {
             <input type="password" placeholder="Senha" value={senha} onChange={(e) => setSenha(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && fazerLogin()} style={{ width: '100%', padding: '16px 20px', fontSize: '15px', background: 'rgba(0,0,0,0.4)', border: `1px solid ${cores.borda}`, borderRadius: '12px', color: cores.texto, marginBottom: '20px', boxSizing: 'border-box', outline: 'none' }} />
             {erroLogin && <div style={{ background: 'rgba(255, 51, 102, 0.15)', border: '1px solid rgba(255, 51, 102, 0.4)', borderRadius: '10px', padding: '14px', marginBottom: '20px', color: cores.vermelho, fontSize: '14px', textAlign: 'center' }}>❌ {erroLogin}</div>}
             <button onClick={fazerLogin} disabled={carregandoLogin || !email || !senha} style={{ width: '100%', padding: '16px', fontSize: '16px', fontWeight: '700', background: carregandoLogin ? cores.textoSecundario : `linear-gradient(135deg, ${cores.azul} 0%, #0080ff 100%)`, border: 'none', borderRadius: '12px', color: '#fff', cursor: carregandoLogin ? 'wait' : 'pointer' }}>{carregandoLogin ? '⏳ Autenticando...' : '🔱 ENTRAR'}</button>
+            
+            {/* LINK PARA CADASTRO */}
+            <div style={{ marginTop: '24px', textAlign: 'center' }}>
+              <span style={{ color: cores.textoSecundario, fontSize: '14px' }}>Não tem uma conta? </span>
+              <button 
+                onClick={() => setTelaAtual('cadastro')} 
+                style={{ background: 'none', border: 'none', color: cores.azul, fontSize: '14px', fontWeight: '600', cursor: 'pointer', textDecoration: 'underline' }}
+              >
+                Criar conta grátis
+              </button>
+            </div>
+            
             <div style={{ marginTop: '28px', padding: '20px', background: 'rgba(0, 212, 255, 0.08)', border: '1px solid rgba(0, 212, 255, 0.2)', borderRadius: '12px', fontSize: '13px' }}>
               <div style={{ color: cores.azul, fontWeight: '600', marginBottom: '10px' }}>🎮 Conta Demo:</div>
               <div style={{ color: cores.textoSecundario }}>Email: <span style={{ color: cores.texto }}>demo@tridente.com</span></div>
               <div style={{ color: cores.textoSecundario }}>Senha: <span style={{ color: cores.texto }}>demo123</span></div>
+            </div>
+          </div>
+        </div>
+      </div></>
+    );
+  }
+
+  // ============================================================================
+  // TELA 1B: CADASTRO
+  // ============================================================================
+  if (!logado && telaAtual === 'cadastro') {
+    return (
+      <><Head><title>Tridente V.32 - Cadastro</title><meta name="viewport" content="width=device-width, initial-scale=1" /></Head>
+      <div style={{ minHeight: '100vh', background: `radial-gradient(ellipse at top, #0d1a2d 0%, ${cores.fundo} 50%, #050508 100%)`, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', fontFamily: "'Segoe UI', sans-serif" }}>
+        <div style={{ width: '100%', maxWidth: '400px' }}>
+          <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+            <div style={{ fontSize: '72px', marginBottom: '16px', filter: 'drop-shadow(0 0 30px rgba(0, 212, 255, 0.5))' }}>🔱</div>
+            <div style={{ fontSize: '32px', fontWeight: '800', color: cores.azul, letterSpacing: '6px' }}>TRIDENTE</div>
+            <div style={{ fontSize: '14px', color: cores.textoSecundario, letterSpacing: '4px', marginTop: '8px' }}>CRIAR CONTA GRATUITA</div>
+          </div>
+          <div style={{ background: 'linear-gradient(145deg, rgba(13, 17, 23, 0.95), rgba(10, 10, 15, 0.98))', border: `1px solid ${cores.borda}`, borderRadius: '20px', padding: '40px 32px' }}>
+            <div style={{ fontSize: '20px', fontWeight: '600', color: '#fff', marginBottom: '28px', textAlign: 'center' }}>📝 Criar Nova Conta</div>
+            
+            <input type="text" placeholder="Nome completo" value={cadastroNome} onChange={(e) => setCadastroNome(e.target.value)} style={{ width: '100%', padding: '16px 20px', fontSize: '15px', background: 'rgba(0,0,0,0.4)', border: `1px solid ${cores.borda}`, borderRadius: '12px', color: cores.texto, marginBottom: '16px', boxSizing: 'border-box', outline: 'none' }} />
+            
+            <input type="email" placeholder="Email" value={cadastroEmail} onChange={(e) => setCadastroEmail(e.target.value)} style={{ width: '100%', padding: '16px 20px', fontSize: '15px', background: 'rgba(0,0,0,0.4)', border: `1px solid ${cores.borda}`, borderRadius: '12px', color: cores.texto, marginBottom: '16px', boxSizing: 'border-box', outline: 'none' }} />
+            
+            <input type="password" placeholder="Senha (mínimo 6 caracteres)" value={cadastroSenha} onChange={(e) => setCadastroSenha(e.target.value)} style={{ width: '100%', padding: '16px 20px', fontSize: '15px', background: 'rgba(0,0,0,0.4)', border: `1px solid ${cores.borda}`, borderRadius: '12px', color: cores.texto, marginBottom: '16px', boxSizing: 'border-box', outline: 'none' }} />
+            
+            <input type="password" placeholder="Confirmar senha" value={cadastroConfirmarSenha} onChange={(e) => setCadastroConfirmarSenha(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && fazerCadastro()} style={{ width: '100%', padding: '16px 20px', fontSize: '15px', background: 'rgba(0,0,0,0.4)', border: `1px solid ${cores.borda}`, borderRadius: '12px', color: cores.texto, marginBottom: '20px', boxSizing: 'border-box', outline: 'none' }} />
+            
+            {erroCadastro && <div style={{ background: 'rgba(255, 51, 102, 0.15)', border: '1px solid rgba(255, 51, 102, 0.4)', borderRadius: '10px', padding: '14px', marginBottom: '20px', color: cores.vermelho, fontSize: '14px', textAlign: 'center' }}>❌ {erroCadastro}</div>}
+            
+            {sucessoCadastro && <div style={{ background: 'rgba(0, 255, 136, 0.15)', border: '1px solid rgba(0, 255, 136, 0.4)', borderRadius: '10px', padding: '14px', marginBottom: '20px', color: cores.verde, fontSize: '14px', textAlign: 'center' }}>✅ {sucessoCadastro}</div>}
+            
+            <button onClick={fazerCadastro} disabled={carregandoCadastro || !cadastroNome || !cadastroEmail || !cadastroSenha || !cadastroConfirmarSenha} style={{ width: '100%', padding: '16px', fontSize: '16px', fontWeight: '700', background: carregandoCadastro ? cores.textoSecundario : `linear-gradient(135deg, ${cores.verde} 0%, #00cc66 100%)`, border: 'none', borderRadius: '12px', color: '#000', cursor: carregandoCadastro ? 'wait' : 'pointer' }}>{carregandoCadastro ? '⏳ Criando conta...' : '✅ CRIAR CONTA GRÁTIS'}</button>
+            
+            {/* LINK PARA LOGIN */}
+            <div style={{ marginTop: '24px', textAlign: 'center' }}>
+              <span style={{ color: cores.textoSecundario, fontSize: '14px' }}>Já tem uma conta? </span>
+              <button 
+                onClick={() => { setTelaAtual('login'); setErroCadastro(''); setSucessoCadastro(''); }} 
+                style={{ background: 'none', border: 'none', color: cores.azul, fontSize: '14px', fontWeight: '600', cursor: 'pointer', textDecoration: 'underline' }}
+              >
+                Fazer login
+              </button>
+            </div>
+            
+            {/* INFO SOBRE PLANO FREE */}
+            <div style={{ marginTop: '28px', padding: '20px', background: 'rgba(0, 255, 136, 0.08)', border: '1px solid rgba(0, 255, 136, 0.2)', borderRadius: '12px', fontSize: '13px' }}>
+              <div style={{ color: cores.verde, fontWeight: '600', marginBottom: '10px' }}>🆓 Plano Gratuito inclui:</div>
+              <div style={{ color: cores.textoSecundario, lineHeight: '1.8' }}>
+                • Acesso ao painel de análise<br/>
+                • 1 ativo revelado por análise<br/>
+                • Posições para encerrar
+              </div>
+              <div style={{ marginTop: '12px', color: cores.dourado, fontSize: '12px' }}>
+                ⭐ Faça upgrade para PREMIUM e tenha acesso completo!
+              </div>
             </div>
           </div>
         </div>
@@ -175,6 +306,11 @@ export default function Home() {
             <div style={{ fontSize: '56px', filter: 'drop-shadow(0 0 25px rgba(0, 212, 255, 0.5))' }}>🔱</div>
             <div style={{ fontSize: '30px', fontWeight: '800', color: cores.azul, letterSpacing: '6px' }}>TRIDENTE</div>
             <div style={{ fontSize: '16px', color: cores.texto, marginTop: '12px' }}>Bem-vindo, <strong style={{ color: cores.azul }}>{usuario?.nome}</strong>!</div>
+            <div style={{ marginTop: '8px' }}>
+              <span style={{ padding: '6px 16px', background: isPremium ? 'rgba(255, 215, 0, 0.2)' : 'rgba(255,255,255,0.1)', borderRadius: '20px', fontSize: '12px', color: isPremium ? cores.dourado : cores.textoSecundario, fontWeight: '600' }}>
+                {isPremium ? '⭐ PREMIUM' : '🆓 FREE'}
+              </span>
+            </div>
           </div>
 
           {/* O QUE É O TRIDENTE - EXPANDIDO */}
@@ -337,12 +473,32 @@ export default function Home() {
           <span style={{ marginLeft: '10px', fontSize: '14px' }}>
             Operador: <strong style={{ color: cores.azul }}>{usuario?.nome}</strong>
           </span>
-          <span style={{ marginLeft: '16px', padding: '4px 10px', background: usuario?.plano === 'premium' ? 'rgba(255, 215, 0, 0.2)' : 'rgba(255,255,255,0.1)', borderRadius: '6px', fontSize: '11px', color: usuario?.plano === 'premium' ? cores.dourado : cores.textoSecundario }}>
-            {usuario?.plano?.toUpperCase() || 'FREE'}
+          <span style={{ marginLeft: '16px', padding: '4px 10px', background: isPremium ? 'rgba(255, 215, 0, 0.2)' : 'rgba(255,255,255,0.1)', borderRadius: '6px', fontSize: '11px', color: isPremium ? cores.dourado : cores.textoSecundario, fontWeight: '600' }}>
+            {isPremium ? '⭐ PREMIUM' : '🆓 FREE'}
           </span>
         </div>
         <button onClick={fazerLogout} style={{ background: 'rgba(255, 51, 102, 0.15)', border: '1px solid rgba(255, 51, 102, 0.4)', borderRadius: '8px', padding: '10px 18px', color: cores.vermelho, cursor: 'pointer', fontSize: '12px', fontWeight: '600' }}>🚪 Sair</button>
       </div>
+
+      {/* BANNER UPGRADE - SÓ PARA FREE */}
+      {!isPremium && !analiseFeita && (
+        <div style={{ background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 136, 0, 0.1) 100%)', border: '1px solid rgba(255, 215, 0, 0.3)', borderRadius: '12px', padding: '20px', marginBottom: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '28px' }}>⭐</span>
+            <div style={{ flex: 1, minWidth: '200px' }}>
+              <div style={{ color: cores.dourado, fontWeight: '700', fontSize: '16px' }}>Faça upgrade para PREMIUM</div>
+              <div style={{ color: cores.textoSecundario, fontSize: '13px' }}>Acesso completo a todos os 3 ativos + instruções detalhadas</div>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ color: cores.verde, fontWeight: '800', fontSize: '20px' }}>R$ {CONFIG.precoMensal.toFixed(2).replace('.', ',')}<span style={{ fontSize: '12px', color: cores.textoSecundario }}>/mês</span></div>
+              <div style={{ color: cores.textoSecundario, fontSize: '11px' }}>ou R$ {CONFIG.precoAnual.toFixed(2).replace('.', ',')}/ano</div>
+            </div>
+          </div>
+          <button style={{ width: '100%', padding: '14px', background: `linear-gradient(135deg, ${cores.dourado} 0%, ${cores.laranja} 100%)`, border: 'none', borderRadius: '10px', color: '#000', fontWeight: '700', fontSize: '14px', cursor: 'pointer' }}>
+            🚀 FAZER UPGRADE AGORA
+          </button>
+        </div>
+      )}
 
       {/* INPUT CAPITAL */}
       {!analiseFeita && (
@@ -459,10 +615,24 @@ export default function Home() {
               </div>
             )}
 
+            {/* AVISO FREE - SÓ VÊ RANK 2 */}
+            {!isPremium && dados.carteiraFinal && dados.carteiraFinal.length > 1 && (
+              <div style={{ background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 136, 0, 0.05) 100%)', border: '1px solid rgba(255, 215, 0, 0.3)', borderRadius: '12px', padding: '16px', marginBottom: '20px' }}>
+                <div style={{ color: cores.dourado, fontWeight: '600', fontSize: '14px', marginBottom: '8px' }}>🔒 Plano FREE - Acesso Limitado</div>
+                <div style={{ color: cores.textoSecundario, fontSize: '13px' }}>
+                  Você está vendo apenas 1 dos 3 ativos selecionados. Faça upgrade para PREMIUM e tenha acesso completo.
+                </div>
+              </div>
+            )}
+
             {dados.carteiraFinal && dados.carteiraFinal.length > 0 ? (
               <>
                 {/* CARDS DE NOVAS POSIÇÕES */}
                 {dados.carteiraFinal.map((ativo, i) => {
+                  // FREE só vê o RANK 2 (índice 1)
+                  const deveExibir = isPremium || i === 1;
+                  const bloqueado = !isPremium && i !== 1;
+                  
                   const peso = 1.0 / dados.carteiraFinal.length;
                   const alocacao = capitalNum * peso;
                   const qtdTotal = capitalNum > 0 ? Math.floor(alocacao / ativo.Preco) : 0;
@@ -475,6 +645,37 @@ export default function Home() {
                   const bgCard = i === 0 ? 'rgba(255, 215, 0, 0.08)' : i === 1 ? 'rgba(192, 192, 192, 0.08)' : 'rgba(205, 127, 50, 0.08)';
                   const rankLabel = i === 0 ? 'RANK 1' : i === 1 ? 'RANK 2' : 'RANK 3';
 
+                  // CARD BLOQUEADO (FREE)
+                  if (bloqueado) {
+                    return (
+                      <div key={i} style={{ background: 'rgba(50, 50, 60, 0.3)', border: `2px dashed ${cores.textoSecundario}`, borderRadius: '14px', padding: '24px', marginBottom: '20px', position: 'relative', overflow: 'hidden' }}>
+                        <div style={{ filter: 'blur(8px)', opacity: '0.3' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                              <span style={{ fontSize: '28px' }}>🏆</span>
+                              <div>
+                                <div style={{ fontWeight: '800', fontSize: '22px' }}>????</div>
+                                <div style={{ fontSize: '12px' }}>?????</div>
+                              </div>
+                            </div>
+                            <span style={{ background: corCard, color: '#000', padding: '6px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: '700' }}>{rankLabel}</span>
+                          </div>
+                        </div>
+                        
+                        {/* OVERLAY */}
+                        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center', width: '80%' }}>
+                          <div style={{ fontSize: '40px', marginBottom: '12px' }}>🔒</div>
+                          <div style={{ color: cores.dourado, fontWeight: '700', fontSize: '16px', marginBottom: '8px' }}>{rankLabel} - BLOQUEADO</div>
+                          <div style={{ color: cores.textoSecundario, fontSize: '13px', marginBottom: '16px' }}>Disponível no plano PREMIUM</div>
+                          <button style={{ padding: '10px 20px', background: `linear-gradient(135deg, ${cores.dourado} 0%, ${cores.laranja} 100%)`, border: 'none', borderRadius: '8px', color: '#000', fontWeight: '700', fontSize: '13px', cursor: 'pointer' }}>
+                            ⭐ FAZER UPGRADE
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  // CARD NORMAL (PREMIUM ou RANK 2 para FREE)
                   return (
                     <div key={i} style={{ background: bgCard, border: `2px solid ${corCard}`, borderRadius: '14px', padding: '24px', marginBottom: '20px' }}>
                       
@@ -583,6 +784,30 @@ export default function Home() {
               </div>
             )}
           </div>
+
+          {/* BANNER UPGRADE PÓS-ANÁLISE - SÓ PARA FREE */}
+          {!isPremium && (
+            <div style={{ background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 136, 0, 0.1) 100%)', border: '2px solid rgba(255, 215, 0, 0.4)', borderRadius: '16px', padding: '28px', marginBottom: '24px', textAlign: 'center' }}>
+              <div style={{ fontSize: '40px', marginBottom: '12px' }}>⭐</div>
+              <div style={{ color: cores.dourado, fontWeight: '800', fontSize: '20px', marginBottom: '8px' }}>Desbloqueie o Acesso Completo</div>
+              <div style={{ color: cores.texto, fontSize: '15px', marginBottom: '20px', lineHeight: '1.6' }}>
+                Tenha acesso aos <strong>3 ativos selecionados</strong>, instruções detalhadas da boleta e muito mais!
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', flexWrap: 'wrap', marginBottom: '20px' }}>
+                <div style={{ background: 'rgba(0,0,0,0.2)', borderRadius: '10px', padding: '16px 24px' }}>
+                  <div style={{ color: cores.textoSecundario, fontSize: '12px' }}>MENSAL</div>
+                  <div style={{ color: cores.verde, fontWeight: '800', fontSize: '24px' }}>R$ {CONFIG.precoMensal.toFixed(2).replace('.', ',')}</div>
+                </div>
+                <div style={{ background: 'rgba(255, 215, 0, 0.1)', borderRadius: '10px', padding: '16px 24px', border: '1px solid rgba(255, 215, 0, 0.3)' }}>
+                  <div style={{ color: cores.dourado, fontSize: '12px' }}>ANUAL <span style={{ background: cores.verde, color: '#000', padding: '2px 6px', borderRadius: '4px', fontSize: '10px', marginLeft: '6px' }}>-25%</span></div>
+                  <div style={{ color: cores.verde, fontWeight: '800', fontSize: '24px' }}>R$ {CONFIG.precoAnual.toFixed(2).replace('.', ',')}</div>
+                </div>
+              </div>
+              <button style={{ padding: '16px 40px', background: `linear-gradient(135deg, ${cores.dourado} 0%, ${cores.laranja} 100%)`, border: 'none', borderRadius: '12px', color: '#000', fontWeight: '700', fontSize: '16px', cursor: 'pointer' }}>
+                🚀 FAZER UPGRADE PARA PREMIUM
+              </button>
+            </div>
+          )}
 
           {/* FINALIZAÇÃO */}
           <div style={{ textAlign: 'center', background: 'linear-gradient(135deg, rgba(0, 255, 136, 0.1) 0%, rgba(0, 200, 100, 0.05) 100%)', border: '2px solid rgba(0, 255, 136, 0.3)', borderRadius: '16px', padding: '40px 24px', marginBottom: '24px' }}>
