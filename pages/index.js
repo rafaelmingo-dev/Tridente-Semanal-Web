@@ -177,17 +177,29 @@ export default function Home() {
             <div style={{ fontSize: '16px', color: cores.texto, marginTop: '12px' }}>Bem-vindo, <strong style={{ color: cores.azul }}>{usuario?.nome}</strong>!</div>
           </div>
 
-          {/* O QUE É O TRIDENTE */}
+          {/* O QUE É O TRIDENTE - EXPANDIDO */}
           <div style={{ background: 'linear-gradient(145deg, rgba(13, 17, 23, 0.9), rgba(10, 10, 15, 0.95))', border: `1px solid ${cores.borda}`, borderRadius: '16px', padding: '24px', marginBottom: '20px' }}>
             <div style={{ fontSize: '18px', fontWeight: '700', color: cores.azul, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
               <span>📊</span> O QUE É O TRIDENTE?
             </div>
-            <div style={{ lineHeight: '1.8', fontSize: '15px', color: cores.texto }}>
+            <div style={{ lineHeight: '1.9', fontSize: '15px', color: cores.texto }}>
               O Tridente é um <strong>painel de apoio à decisão</strong> desenvolvido para investidores que desejam construir patrimônio no longo prazo através da renda variável brasileira.
               <br/><br/>
-              Criado para quem busca uma abordagem <strong>sistemática, disciplinada e de baixa manutenção</strong>, o painel analisa o mercado e identifica oportunidades com base em critérios técnicos objetivos.
+              
+              <strong style={{ color: cores.azul }}>Como funciona?</strong><br/>
+              O painel analisa um universo de <strong>26 ativos</strong> cuidadosamente selecionados da bolsa brasileira (B3), incluindo ações de grandes empresas, ETFs e fundos imobiliários. A cada mês, o sistema avalia cada ativo utilizando critérios técnicos objetivos e identifica as melhores oportunidades do momento.
               <br/><br/>
-              A metodologia foi desenvolvida para investidores que não têm tempo ou conhecimento técnico avançado, mas desejam participar do mercado de ações de forma <strong>organizada e consistente</strong>.
+              
+              <strong style={{ color: cores.azul }}>O que o painel entrega?</strong><br/>
+              Após a análise, você recebe um <strong>guia de execução completo</strong> com instruções passo a passo sobre quais posições manter, quais encerrar e quais novas posições considerar. O painel calcula automaticamente a distribuição do seu capital e fornece os dados exatos para você preencher as ordens na sua corretora.
+              <br/><br/>
+              
+              <strong style={{ color: cores.azul }}>Para quem é indicado?</strong><br/>
+              O Tridente foi criado para investidores que buscam uma abordagem <strong>sistemática, disciplinada e de baixa manutenção</strong>. É ideal para quem não tem tempo ou conhecimento técnico avançado, mas deseja participar do mercado de ações de forma organizada e consistente, dedicando apenas alguns minutos por mês.
+              <br/><br/>
+              
+              <strong style={{ color: cores.azul }}>Qual a filosofia do sistema?</strong><br/>
+              O Tridente segue uma metodologia baseada em <strong>seguir tendências</strong> e <strong>gerenciar riscos</strong>. O sistema busca identificar ativos em momentos favoráveis e, principalmente, saber a hora certa de sair de posições que não estão mais funcionando. A gestão de risco é tão importante quanto a seleção dos ativos.
             </div>
           </div>
 
@@ -197,12 +209,38 @@ export default function Home() {
               <span>🎯</span> O QUE VOCÊ PODE ESPERAR?
             </div>
             <div style={{ lineHeight: '1.8', fontSize: '15px', color: cores.texto }}>
-              <div style={{ marginBottom: '12px' }}>✅ <strong>Análises mensais simples e objetivas</strong> — O painel faz o trabalho técnico e entrega instruções claras.</div>
-              <div style={{ marginBottom: '12px' }}>✅ <strong>Busca por retornos acima da taxa Selic no longo prazo</strong> — O objetivo é superar a renda fixa tradicional ao longo dos anos.</div>
-              <div style={{ marginBottom: '12px' }}>✅ <strong>Diversificação entre diferentes setores</strong> — Exposição a múltiplos segmentos da economia brasileira.</div>
-              <div style={{ marginBottom: '12px' }}>✅ <strong>Gestão de risco com critérios de saída</strong> — O painel identifica quando é hora de encerrar uma posição.</div>
-              <div style={{ marginBottom: '12px' }}>✅ <strong>Instruções passo a passo</strong> — Você saberá exatamente o que fazer na sua corretora.</div>
-              <div>✅ <strong>Tempo de dedicação: ~15 minutos por mês</strong> — Ideal para quem tem uma rotina ocupada.</div>
+              <div style={{ marginBottom: '12px' }}>✅ <strong>Análises mensais simples e objetivas</strong> — O painel faz o trabalho técnico e entrega instruções claras, sem complicação.</div>
+              <div style={{ marginBottom: '12px' }}>✅ <strong>Busca por retornos acima da taxa Selic no longo prazo</strong> — O objetivo é superar a renda fixa tradicional ao longo dos anos, aproveitando o potencial da renda variável.</div>
+              <div style={{ marginBottom: '12px' }}>✅ <strong>Diversificação entre diferentes setores</strong> — Exposição a múltiplos segmentos da economia brasileira, reduzindo a dependência de um único setor.</div>
+              <div style={{ marginBottom: '12px' }}>✅ <strong>Gestão de risco com critérios de saída definidos</strong> — O painel identifica quando é hora de encerrar uma posição, protegendo seu capital de quedas prolongadas.</div>
+              <div style={{ marginBottom: '12px' }}>✅ <strong>Instruções passo a passo detalhadas</strong> — Você saberá exatamente o que fazer na sua corretora, com todos os dados necessários para preencher as ordens.</div>
+              <div style={{ marginBottom: '12px' }}>✅ <strong>Tempo de dedicação: ~15 minutos por mês</strong> — Ideal para quem tem uma rotina ocupada e não quer acompanhar o mercado diariamente.</div>
+              <div>✅ <strong>Disciplina e consistência</strong> — O sistema remove a emoção das decisões, seguindo regras objetivas independente do humor do mercado.</div>
+            </div>
+          </div>
+
+          {/* COMO FUNCIONA NA PRÁTICA */}
+          <div style={{ background: 'linear-gradient(145deg, rgba(13, 17, 23, 0.9), rgba(10, 10, 15, 0.95))', border: `1px solid ${cores.ciano}`, borderRadius: '16px', padding: '24px', marginBottom: '20px' }}>
+            <div style={{ fontSize: '18px', fontWeight: '700', color: cores.ciano, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span>🔄</span> COMO FUNCIONA NA PRÁTICA?
+            </div>
+            <div style={{ lineHeight: '1.8', fontSize: '15px', color: cores.texto }}>
+              <div style={{ marginBottom: '16px', padding: '14px', background: 'rgba(0,0,0,0.2)', borderRadius: '10px', borderLeft: `3px solid ${cores.azul}` }}>
+                <strong style={{ color: cores.azul }}>1. Acesse o painel uma vez por mês</strong><br/>
+                <span style={{ color: cores.textoSecundario }}>Na primeira segunda-feira útil de cada mês, acesse o Tridente para obter a análise atualizada.</span>
+              </div>
+              <div style={{ marginBottom: '16px', padding: '14px', background: 'rgba(0,0,0,0.2)', borderRadius: '10px', borderLeft: `3px solid ${cores.verde}` }}>
+                <strong style={{ color: cores.verde }}>2. Informe seu capital disponível</strong><br/>
+                <span style={{ color: cores.textoSecundario }}>Digite o valor que você tem disponível para investir. O painel calculará a distribuição ideal.</span>
+              </div>
+              <div style={{ marginBottom: '16px', padding: '14px', background: 'rgba(0,0,0,0.2)', borderRadius: '10px', borderLeft: `3px solid ${cores.amarelo}` }}>
+                <strong style={{ color: cores.amarelo }}>3. Receba as instruções detalhadas</strong><br/>
+                <span style={{ color: cores.textoSecundario }}>O painel mostrará quais posições encerrar e quais novas posições abrir, com todos os dados para execução.</span>
+              </div>
+              <div style={{ padding: '14px', background: 'rgba(0,0,0,0.2)', borderRadius: '10px', borderLeft: `3px solid ${cores.roxo}` }}>
+                <strong style={{ color: cores.roxo }}>4. Execute as ordens na sua corretora</strong><br/>
+                <span style={{ color: cores.textoSecundario }}>Siga o passo a passo e execute as ordens. Depois, é só aguardar até o próximo mês.</span>
+              </div>
             </div>
           </div>
 
@@ -212,13 +250,11 @@ export default function Home() {
               <span>⚠️</span> O QUE O TRIDENTE NÃO É
             </div>
             <div style={{ lineHeight: '1.8', fontSize: '15px', color: cores.texto }}>
-              <div style={{ marginBottom: '12px' }}>❌ <strong>Não é garantia de lucro ou rentabilidade</strong> — Todo investimento em renda variável envolve riscos.</div>
-              <div style={{ marginBottom: '12px' }}>❌ <strong>Não é recomendação personalizada</strong> — O painel não considera sua situação financeira individual.</div>
-              <div style={{ marginBottom: '12px' }}>❌ <strong>Não substitui sua própria análise</strong> — A decisão final é sempre sua.</div>
-              <div style={{ marginBottom: '12px' }}>❌ <strong>Não é adequado para ganhos rápidos</strong> — A estratégia é focada no longo prazo.</div>
-              <div style={{ padding: '14px', background: 'rgba(255, 51, 102, 0.1)', borderRadius: '10px', marginTop: '16px', color: cores.vermelho }}>
-                <strong>⚠️ RISCO:</strong> O mercado de renda variável pode resultar em perdas. Você pode perder parte ou todo o capital investido. Resultados passados não garantem resultados futuros.
-              </div>
+              <div style={{ marginBottom: '12px' }}>❌ <strong>Não é garantia de lucro ou rentabilidade</strong> — Todo investimento em renda variável envolve riscos. Resultados passados não garantem resultados futuros.</div>
+              <div style={{ marginBottom: '12px' }}>❌ <strong>Não é recomendação personalizada de investimento</strong> — O painel não considera sua situação financeira individual, seus objetivos ou tolerância a risco.</div>
+              <div style={{ marginBottom: '12px' }}>❌ <strong>Não substitui sua própria análise e julgamento</strong> — A decisão final de investir é sempre sua. O painel é uma ferramenta de apoio, não um consultor financeiro.</div>
+              <div style={{ marginBottom: '12px' }}>❌ <strong>Não é adequado para quem busca ganhos rápidos</strong> — A metodologia é focada no longo prazo. Se você busca day trade ou ganhos de curto prazo, esta não é a ferramenta adequada.</div>
+              <div>❌ <strong>Não é um robô que opera automaticamente</strong> — Você precisará executar as ordens manualmente na sua corretora. O painel fornece as instruções, mas a execução é sua.</div>
             </div>
           </div>
 
@@ -377,7 +413,7 @@ export default function Home() {
             {dados.vendas && dados.vendas.length > 0 ? (
               <>
                 <div style={{ color: cores.textoSecundario, marginBottom: '16px', fontSize: '14px' }}>
-                  Se você possui algum destes ativos, encerre a posição utilizando uma ordem de saída a mercado.
+                  Se você possui algum destes ativos, encerre a posição utilizando uma ordem a mercado na sua corretora.
                 </div>
                 
                 {/* GRID DE CARDS */}
@@ -419,89 +455,116 @@ export default function Home() {
 
             {capitalNum === 0 && (
               <div style={{ background: 'rgba(0, 212, 255, 0.1)', border: '1px solid rgba(0, 212, 255, 0.3)', borderRadius: '10px', padding: '14px', marginBottom: '20px', color: cores.azul, fontSize: '14px' }}>
-                ℹ️ <strong>Modo Revisão:</strong> Exibindo ativos selecionados sem cálculo de valores. Para ver a distribuição, faça uma nova análise informando o valor do aporte.
+                ℹ️ <strong>Modo Revisão:</strong> Exibindo ativos selecionados sem cálculo de valores. Para ver a distribuição e instruções detalhadas, faça uma nova análise informando o valor do aporte.
               </div>
             )}
 
             {dados.carteiraFinal && dados.carteiraFinal.length > 0 ? (
               <>
-                {/* GRID DE CARDS */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
-                  {dados.carteiraFinal.map((ativo, i) => {
-                    const peso = 1.0 / dados.carteiraFinal.length;
-                    const alocacao = capitalNum * peso;
-                    const qtdTotal = capitalNum > 0 ? Math.floor(alocacao / ativo.Preco) : 0;
-                    const lotesPadrao = Math.floor(qtdTotal / 100);
-                    const qtdPadrao = lotesPadrao * 100;
-                    const qtdFrac = qtdTotal % 100;
-                    const tickerLimpo = ativo.Ticker.replace('.SA', '');
-                    const isAtaque = ativo.Tipo === 'ATAQUE';
-                    const corCard = i === 0 ? cores.dourado : i === 1 ? cores.prata : cores.bronze;
-                    const bgCard = i === 0 ? 'rgba(255, 215, 0, 0.08)' : i === 1 ? 'rgba(192, 192, 192, 0.08)' : 'rgba(205, 127, 50, 0.08)';
-                    const rankLabel = i === 0 ? 'RANK 1' : i === 1 ? 'RANK 2' : 'RANK 3';
+                {/* CARDS DE NOVAS POSIÇÕES */}
+                {dados.carteiraFinal.map((ativo, i) => {
+                  const peso = 1.0 / dados.carteiraFinal.length;
+                  const alocacao = capitalNum * peso;
+                  const qtdTotal = capitalNum > 0 ? Math.floor(alocacao / ativo.Preco) : 0;
+                  const lotesPadrao = Math.floor(qtdTotal / 100);
+                  const qtdPadrao = lotesPadrao * 100;
+                  const qtdFrac = qtdTotal % 100;
+                  const tickerLimpo = ativo.Ticker.replace('.SA', '');
+                  const isAtaque = ativo.Tipo === 'ATAQUE';
+                  const corCard = i === 0 ? cores.dourado : i === 1 ? cores.prata : cores.bronze;
+                  const bgCard = i === 0 ? 'rgba(255, 215, 0, 0.08)' : i === 1 ? 'rgba(192, 192, 192, 0.08)' : 'rgba(205, 127, 50, 0.08)';
+                  const rankLabel = i === 0 ? 'RANK 1' : i === 1 ? 'RANK 2' : 'RANK 3';
 
-                    return (
-                      <div key={i} style={{ background: bgCard, border: `2px solid ${corCard}`, borderRadius: '14px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                        {/* HEADER */}
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <span style={{ fontSize: '24px' }}>🏆</span>
-                            <span style={{ color: corCard, fontWeight: '800', fontSize: '20px' }}>{tickerLimpo}</span>
+                  return (
+                    <div key={i} style={{ background: bgCard, border: `2px solid ${corCard}`, borderRadius: '14px', padding: '24px', marginBottom: '20px' }}>
+                      
+                      {/* HEADER DO CARD */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <span style={{ fontSize: '28px' }}>🏆</span>
+                          <div>
+                            <div style={{ color: corCard, fontWeight: '800', fontSize: '22px' }}>{tickerLimpo}</div>
+                            <div style={{ fontSize: '12px', color: cores.textoSecundario }}>{isAtaque ? '⚔️ ATAQUE' : '🛡️ DEFESA'}</div>
                           </div>
-                          <span style={{ background: corCard, color: '#000', padding: '4px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: '700' }}>{rankLabel}</span>
                         </div>
+                        <span style={{ background: corCard, color: '#000', padding: '6px 14px', borderRadius: '8px', fontSize: '12px', fontWeight: '700' }}>{rankLabel}</span>
+                      </div>
 
-                        {/* VALOR E PREÇO */}
-                        <div style={{ background: 'rgba(0,0,0,0.2)', borderRadius: '10px', padding: '14px' }}>
-                          {capitalNum > 0 ? (
-                            <>
-                              <div style={{ fontSize: '28px', fontWeight: '800', color: cores.verde, marginBottom: '4px' }}>{formatCurrency(alocacao)}</div>
-                              <div style={{ fontSize: '13px', color: cores.textoSecundario }}>{isAtaque ? '⚔️ ATAQUE' : '🛡️ DEFESA'} • Preço: R$ {ativo.Preco.toFixed(2)}</div>
-                            </>
-                          ) : (
-                            <div style={{ fontSize: '13px', color: cores.textoSecundario }}>{isAtaque ? '⚔️ ATAQUE' : '🛡️ DEFESA'} • Preço: R$ {ativo.Preco.toFixed(2)}</div>
+                      {/* VALOR E PREÇO */}
+                      {capitalNum > 0 && (
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
+                          <div style={{ background: 'rgba(0,0,0,0.2)', borderRadius: '10px', padding: '14px' }}>
+                            <div style={{ fontSize: '12px', color: cores.textoSecundario, marginBottom: '4px' }}>💰 Valor a investir</div>
+                            <div style={{ fontSize: '24px', fontWeight: '800', color: cores.verde }}>{formatCurrency(alocacao)}</div>
+                          </div>
+                          <div style={{ background: 'rgba(0,0,0,0.2)', borderRadius: '10px', padding: '14px' }}>
+                            <div style={{ fontSize: '12px', color: cores.textoSecundario, marginBottom: '4px' }}>📊 Preço Atual</div>
+                            <div style={{ fontSize: '24px', fontWeight: '800', color: cores.azul }}>R$ {ativo.Preco.toFixed(2)}</div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* MODO REVISÃO - SEM VALORES */}
+                      {capitalNum === 0 && (
+                        <div style={{ background: 'rgba(0,0,0,0.2)', borderRadius: '10px', padding: '14px', marginBottom: '20px' }}>
+                          <div style={{ fontSize: '12px', color: cores.textoSecundario, marginBottom: '4px' }}>📊 Preço Atual</div>
+                          <div style={{ fontSize: '24px', fontWeight: '800', color: cores.azul }}>R$ {ativo.Preco.toFixed(2)}</div>
+                        </div>
+                      )}
+
+                      {/* INSTRUÇÕES DETALHADAS DA BOLETA */}
+                      {capitalNum > 0 && qtdTotal > 0 && (
+                        <div style={{ background: 'rgba(0, 212, 255, 0.08)', border: '1px solid rgba(0, 212, 255, 0.3)', borderRadius: '12px', padding: '20px' }}>
+                          <div style={{ color: cores.azul, fontWeight: '700', fontSize: '16px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span>📝</span> COMO PREENCHER A ORDEM (BOLETA):
+                          </div>
+
+                          {/* LOTE PADRÃO */}
+                          {qtdPadrao > 0 && (
+                            <div style={{ background: 'rgba(0,0,0,0.2)', borderRadius: '10px', padding: '16px', marginBottom: qtdFrac > 0 ? '16px' : '0', borderLeft: `3px solid ${cores.verde}` }}>
+                              <div style={{ color: cores.verde, fontWeight: '600', marginBottom: '12px' }}>[1] LOTE PADRÃO</div>
+                              <div style={{ lineHeight: '2.2', fontSize: '15px' }}>
+                                <div>Digite o código: <strong style={{ color: '#fff', background: 'rgba(255,255,255,0.1)', padding: '2px 8px', borderRadius: '4px' }}>{tickerLimpo}</strong></div>
+                                <div>Quantidade: <strong style={{ color: cores.azul }}>{qtdPadrao}</strong></div>
+                                <div>Preço: <strong style={{ color: cores.amarelo }}>A Mercado</strong> (Melhor oferta)</div>
+                                <div style={{ marginTop: '10px', color: cores.verde, fontWeight: '700' }}>👉 EXECUTAR ORDEM</div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* FRACIONÁRIO */}
+                          {qtdFrac > 0 && (
+                            <div style={{ background: 'rgba(0,0,0,0.2)', borderRadius: '10px', padding: '16px', borderLeft: `3px solid ${cores.ciano}` }}>
+                              <div style={{ color: cores.ciano, fontWeight: '600', marginBottom: '12px' }}>[{qtdPadrao > 0 ? '2' : '1'}] FRACIONÁRIO</div>
+                              <div style={{ lineHeight: '2.2', fontSize: '15px' }}>
+                                <div>{qtdPadrao > 0 ? 'Também digite' : 'Digite'} o código: <strong style={{ color: '#fff', background: 'rgba(255,255,255,0.1)', padding: '2px 8px', borderRadius: '4px' }}>{tickerLimpo}F</strong> <span style={{ color: cores.textoSecundario }}>(Com o 'F' no final)</span></div>
+                                <div>Quantidade: <strong style={{ color: cores.azul }}>{qtdFrac}</strong></div>
+                                <div>Preço: <strong style={{ color: cores.amarelo }}>A Mercado</strong></div>
+                                <div style={{ marginTop: '10px', color: cores.verde, fontWeight: '700' }}>👉 EXECUTAR ORDEM</div>
+                              </div>
+                            </div>
                           )}
                         </div>
+                      )}
 
-                        {/* DADOS PARA EXECUÇÃO */}
-                        {capitalNum > 0 && qtdTotal > 0 && (
-                          <div style={{ background: 'rgba(0, 255, 136, 0.1)', border: '1px solid rgba(0, 255, 136, 0.3)', borderRadius: '10px', padding: '14px' }}>
-                            <div style={{ color: cores.verde, fontWeight: '600', fontSize: '12px', marginBottom: '10px' }}>📝 DADOS PARA EXECUÇÃO</div>
-                            <div style={{ fontSize: '14px', lineHeight: '1.8' }}>
-                              {qtdPadrao > 0 && (
-                                <div style={{ marginBottom: '8px' }}>
-                                  Entrada: <strong style={{ color: cores.azul }}>{qtdPadrao}</strong> x <strong>{tickerLimpo}</strong>
-                                  <span style={{ color: cores.textoSecundario, fontSize: '12px' }}> (LOTE)</span>
-                                </div>
-                              )}
-                              {qtdFrac > 0 && (
-                                <div>
-                                  Entrada: <strong style={{ color: cores.azul }}>{qtdFrac}</strong> x <strong>{tickerLimpo}F</strong>
-                                  <span style={{ color: cores.textoSecundario, fontSize: '12px' }}> (FRAC)</span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        )}
-
-                        {capitalNum > 0 && qtdTotal === 0 && (
-                          <div style={{ color: cores.amarelo, fontSize: '13px', padding: '10px', background: 'rgba(255, 204, 0, 0.1)', borderRadius: '8px' }}>
-                            ⚠️ Valor insuficiente para este ativo
-                          </div>
-                        )}
-
-                        {/* CRITÉRIO */}
-                        <div style={{ fontSize: '12px', color: cores.roxo }}>
-                          Critério: <strong>{ativo.Status}</strong>
+                      {/* VALOR INSUFICIENTE */}
+                      {capitalNum > 0 && qtdTotal === 0 && (
+                        <div style={{ color: cores.amarelo, fontSize: '14px', padding: '14px', background: 'rgba(255, 204, 0, 0.1)', borderRadius: '10px' }}>
+                          ⚠️ Valor insuficiente para abrir posição neste ativo.
                         </div>
+                      )}
+
+                      {/* CRITÉRIO DE SELEÇÃO */}
+                      <div style={{ marginTop: '16px', padding: '12px', background: 'rgba(168, 85, 247, 0.1)', borderRadius: '8px', color: cores.roxo, fontSize: '13px' }}>
+                        Critério de seleção: <strong>{ativo.Status}</strong>
                       </div>
-                    );
-                  })}
-                </div>
+                    </div>
+                  );
+                })}
 
                 {/* AVISO SE NÃO COMPLETOU 3 */}
                 {dados.carteiraFinal.length < 3 && (
-                  <div style={{ background: 'rgba(255, 204, 0, 0.1)', border: '1px solid rgba(255, 204, 0, 0.3)', borderRadius: '12px', padding: '20px', marginTop: '16px' }}>
+                  <div style={{ background: 'rgba(255, 204, 0, 0.1)', border: '1px solid rgba(255, 204, 0, 0.3)', borderRadius: '12px', padding: '20px' }}>
                     <div style={{ color: cores.amarelo, fontWeight: '600', marginBottom: '8px' }}>⚠️ Momento de cautela no mercado.</div>
                     <div style={{ color: cores.texto, fontSize: '14px' }}>
                       Não foram identificados 3 ativos que atendam aos critérios. O capital restante pode ser mantido em <strong>{CONFIG.ativoCaixa.replace('.SA', '')}</strong> ou Tesouro Selic.
